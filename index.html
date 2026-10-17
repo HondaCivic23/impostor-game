@@ -171,7 +171,6 @@
             cursor: pointer;
         }
 
-        /* STYL WYNIKU JAK NA SCREENACH */
         .result-view {
             flex: 1;
             display: flex;
@@ -222,7 +221,6 @@
             color: #ffffff;
         }
 
-        /* KARTA I ROLETA */
         .card-view-container {
             position: relative;
             width: 100%;
@@ -242,6 +240,11 @@
             justify-content: center;
             align-items: center;
             background: var(--card-neutral-bg);
+            opacity: 0;
+        }
+
+        .card-inner-content.revealed {
+            opacity: 1;
         }
 
         .sliding-cover {
@@ -256,6 +259,7 @@
             z-index: 10;
             touch-action: none;
             cursor: grab;
+            transform: translateY(0);
         }
 
         .cover-top-text {
@@ -275,7 +279,6 @@
             justify-content: center;
             font-size: 4.5rem;
             border: 1px solid rgba(255,255,255,0.1);
-            position: relative;
         }
 
         .swipe-hint-box {
@@ -377,7 +380,6 @@
                 </div>
 
                 <div class="card-view-container" id="card-container">
-                    <!-- Wynik pod roletą -->
                     <div class="card-inner-content" id="card-inner">
                         <div class="result-view">
                             <div class="role-icon-lg" id="role-icon">👥</div>
@@ -389,12 +391,9 @@
                         </div>
                     </div>
 
-                    <!-- Roleta z postaciami i tekstem jak na zdjęciu -->
                     <div class="sliding-cover" id="sliding-cover">
                         <div class="cover-top-text">Gracz</div>
-                        <div class="cover-avatars-box">
-                            👥🕵️‍♂️
-                        </div>
+                        <div class="cover-avatars-box">👥🕵️‍♂️</div>
                         <div class="swipe-hint-box">
                             Przesuń, by odkryć słowo. Uważaj na Impostorów! 👀
                             <span class="arrow-anim">▲</span>
@@ -588,7 +587,7 @@
 
             currentIndex = 0;
             showScreen('reveal-screen');
-            loadPlayerTurn();
+            loadPlayerTurnFirstTime();
         }
 
         function showScreen(id) {
@@ -596,10 +595,20 @@
             document.getElementById(id).classList.add('active');
         }
 
-        function loadPlayerTurn() {
+        // Ładowanie dla pierwszego gracza bez animacji rolety
+        function loadPlayerTurnFirstTime() {
             const data = gameData[currentIndex];
             document.getElementById("current-player-name").innerText = data.name;
+            setupRoleContent(data);
+            
+            cover.style.transition = 'none';
+            cover.style.transform = 'translateY(0)';
+            currentY = 0;
+            cardInner.classList.remove("revealed");
+            document.getElementById("next-btn").style.display = "none";
+        }
 
+        function setupRoleContent(data) {
             const iconEl = document.getElementById("role-icon");
             const titleEl = document.getElementById("role-title");
             const descEl = document.getElementById("role-desc");
@@ -622,20 +631,31 @@
                 titleEl.classList.add("mrwhite");
                 descEl.innerHTML = `<span>Nie masz żadnego słowa! Blefuj!</span>`;
             }
-
-            resetCover();
-            document.getElementById("next-btn").style.display = "none";
         }
 
         function nextPlayer() {
-            currentIndex++;
-            if (currentIndex < players.length) {
-                loadPlayerTurn();
-            } else {
-                const starter = players[Math.floor(Math.random() * players.length)];
-                document.getElementById("starter-player-name").innerText = starter;
-                showScreen('start-discussion-screen');
-            }
+            // 1. Schowaj stary tekst, żeby nie mignął
+            cardInner.classList.remove("revealed");
+            document.getElementById("next-btn").style.display = "none";
+
+            // 2. Płynna animacja opadania rolety z powrotem na dół (300ms)
+            cover.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+            cover.style.transform = `translateY(0)`;
+            currentY = 0;
+
+            // 3. Dopiero PO ZAKOŃCZENIU opadania rolety (300ms) zmieniamy dane kolejnego gracza pod spodem
+            setTimeout(() => {
+                currentIndex++;
+                if (currentIndex < players.length) {
+                    const data = gameData[currentIndex];
+                    document.getElementById("current-player-name").innerText = data.name;
+                    setupRoleContent(data);
+                } else {
+                    const starter = players[Math.floor(Math.random() * players.length)];
+                    document.getElementById("starter-player-name").innerText = starter;
+                    showScreen('start-discussion-screen');
+                }
+            }, 300);
         }
 
         function replaysameGame() { startGame(); }
@@ -643,6 +663,7 @@
 
         const cover = document.getElementById("sliding-cover");
         const cardContainer = document.getElementById("card-container");
+        const cardInner = document.getElementById("card-inner");
         let startY = 0, currentY = 0, isDragging = false;
 
         function getClientY(e) { return e.touches ? e.touches[0].clientY : e.clientY; }
@@ -659,6 +680,10 @@
             if (delta <= 0) {
                 currentY = Math.max(delta, -cardContainer.clientHeight);
                 cover.style.transform = `translateY(${currentY}px)`;
+                
+                if (currentY < -10) {
+                    cardInner.classList.add("revealed");
+                }
             }
         }
 
@@ -668,6 +693,7 @@
             cover.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
             if (currentY < -(cardContainer.clientHeight * 0.35)) {
                 cover.style.transform = `translateY(-100%)`;
+                cardInner.classList.add("revealed");
                 document.getElementById("next-btn").style.display = "block";
             } else {
                 resetCover();
@@ -678,6 +704,7 @@
             cover.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
             cover.style.transform = `translateY(0)`;
             currentY = 0;
+            cardInner.classList.remove("revealed");
         }
 
         cover.addEventListener('touchstart', onStart, {passive:true});
