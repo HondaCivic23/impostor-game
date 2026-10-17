@@ -587,7 +587,7 @@
 
             currentIndex = 0;
             showScreen('reveal-screen');
-            loadPlayerTurnFirstTime();
+            loadPlayerTurn();
         }
 
         function showScreen(id) {
@@ -595,23 +595,22 @@
             document.getElementById(id).classList.add('active');
         }
 
-        // Ładowanie dla pierwszego gracza bez animacji rolety
-        function loadPlayerTurnFirstTime() {
+        function loadPlayerTurn() {
             const data = gameData[currentIndex];
             document.getElementById("current-player-name").innerText = data.name;
-            setupRoleContent(data);
-            
-            cover.style.transition = 'none';
-            cover.style.transform = 'translateY(0)';
-            currentY = 0;
-            cardInner.classList.remove("revealed");
-            document.getElementById("next-btn").style.display = "none";
-        }
 
-        function setupRoleContent(data) {
             const iconEl = document.getElementById("role-icon");
             const titleEl = document.getElementById("role-title");
             const descEl = document.getElementById("role-desc");
+            const cardInner = document.getElementById("card-inner");
+
+            // 1. Najpierw natychmiast chowamy tekst pod spodem (zanim roleta wraca)
+            cardInner.classList.remove("revealed");
+
+            // 2. Natychmiast zrzucamy roletę na dół BEZ ŻADNEJ ANIMACJI (transition = none)
+            cover.style.transition = 'none';
+            cover.style.transform = 'translateY(0)';
+            currentY = 0;
 
             titleEl.className = "role-title-styled";
 
@@ -631,31 +630,19 @@
                 titleEl.classList.add("mrwhite");
                 descEl.innerHTML = `<span>Nie masz żadnego słowa! Blefuj!</span>`;
             }
+
+            document.getElementById("next-btn").style.display = "none";
         }
 
         function nextPlayer() {
-            // 1. Schowaj stary tekst, żeby nie mignął
-            cardInner.classList.remove("revealed");
-            document.getElementById("next-btn").style.display = "none";
-
-            // 2. Płynna animacja opadania rolety z powrotem na dół (300ms)
-            cover.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
-            cover.style.transform = `translateY(0)`;
-            currentY = 0;
-
-            // 3. Dopiero PO ZAKOŃCZENIU opadania rolety (300ms) zmieniamy dane kolejnego gracza pod spodem
-            setTimeout(() => {
-                currentIndex++;
-                if (currentIndex < players.length) {
-                    const data = gameData[currentIndex];
-                    document.getElementById("current-player-name").innerText = data.name;
-                    setupRoleContent(data);
-                } else {
-                    const starter = players[Math.floor(Math.random() * players.length)];
-                    document.getElementById("starter-player-name").innerText = starter;
-                    showScreen('start-discussion-screen');
-                }
-            }, 300);
+            currentIndex++;
+            if (currentIndex < players.length) {
+                loadPlayerTurn();
+            } else {
+                const starter = players[Math.floor(Math.random() * players.length)];
+                document.getElementById("starter-player-name").innerText = starter;
+                showScreen('start-discussion-screen');
+            }
         }
 
         function replaysameGame() { startGame(); }
@@ -701,7 +688,7 @@
         }
 
         function resetCover() {
-            cover.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+            cover.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);';
             cover.style.transform = `translateY(0)`;
             currentY = 0;
             cardInner.classList.remove("revealed");
