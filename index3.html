@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#120c1f">
+    <title>Impostor - Kim jest szpieg?</title>
+    <style>
+        :root {
+            --bg-color: #000000;
+            --panel-bg: #151022;
+            --card-neutral-bg: linear-gradient(180deg, #6222cc 0%, #290c5c 100%);
+            --primary-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --civilian-blue: #0ea5e9;
+            --impostor-red: #ef4444;
+            --text-light: #ffffff;
+            --text-muted: #94a3b8;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            height: -webkit-fill-available;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .app-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            padding: max(16px, var(--safe-top)) 16px max(16px, var(--safe-bottom)) 16px;
+            max-width: 440px;
+            margin: 0 auto;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .game-title {
+            text-align: center;
+            font-size: 2.1rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0 0 2px 0;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 0 0 14px 0;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .input-box {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 16px;
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            background-color: var(--panel-bg);
+            color: var(--text-light);
+            font-size: 1rem;
+            font-weight: 600;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent-pink);
+        }
+
+        .btn {
+            min-height: 54px;
+            background: linear-gradient(135deg, var(--primary-purple) 0%, #6d28d9 100%);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 18px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-add {
+            width: auto;
+            min-width: 58px;
+            font-size: 1.5rem;
+            padding: 0;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+        }
+
+        .players-scroll {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 12px;
+            padding-right: 2px;
+        }
+
+        #player-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        #player-list li {
+            background: var(--panel-bg);
+            padding: 12px 16px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            font-weight: 700;
+        }
+
+        #player-list li button {
+            background: #ef4444;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .result-view {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px 10px;
+        }
+
+        .role-icon-lg {
+            font-size: 4rem;
+            margin-bottom: 12px;
+        }
+
+        .role-title-styled {
+            font-size: 2.3rem;
+            font-weight: 900;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .role-title-styled.civilian {
+            color: var(--civilian-blue);
+        }
+
+        .role-title-styled.impostor {
+            color: var(--impostor-red);
+        }
+
+        .role-title-styled.mrwhite {
+            color: var(--civilian-blue);
+        }
+
+        .role-desc-styled {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.4;
+            max-width: 320px;
+        }
+
+        .role-desc-styled span {
+            display: block;
+            font-size: 1.8rem;
+            font-weight: 900;
+            margin-top: 6px;
+            color: #ffffff;
+        }
+
+        .card-view-container {
+            position: relative;
+            width: 100%;
+            flex: 1;
+            margin: 10px 0;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .card-inner-content {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: var(--card-neutral-bg);
+            opacity: 0;
+        }
+
+        .card-inner-content.revealed {
+            opacity: 1;
+        }
+
+        .sliding-cover {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(180deg, #6b21a8 0%, #3b0764 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 20px;
+            z-index: 10;
+            touch-action: none;
+            cursor: grab;
+            transform: translateY(0);
+        }
+
+        .cover-top-text {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: rgba(255,255,255,0.9);
+            letter-spacing: 0.5px;
+        }
+
+        .cover-avatars-box {
+            width: 100%;
+            height: 220px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .swipe-hint-box {
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            line-height: 1.4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .arrow-anim {
+            animation: floatUp 1.2s infinite ease-in-out;
+            color: var(--accent-pink);
+            font-size: 1.6rem;
+        }
+
+        @keyframes floatUp {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .starter-card {
+            background: var(--panel-bg);
+            border: 2px solid var(--primary-purple);
+            border-radius: 24px;
+            padding: 30px 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .starter-name {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--accent-pink);
+            margin-top: 10px;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-wrapper">
+        <div class="container">
+            
+            <!-- EKRAN 1: SETUP -->
+            <div id="setup-screen" class="screen active">
+                <div class="game-title">IMPOSTOR</div>
+                <div class="subtitle">KIM JEST SZPIEG?</div>
+
+                <div class="input-box">
+                    <input type="text" id="player-input" placeholder="Wpisz imię gracza..." autocomplete="off">
+                    <button class="btn btn-add" onclick="addPlayer()">+</button>
+                </div>
+
+                <div class="players-scroll">
+                    <ul id="player-list"></ul>
+                </div>
+
+                <select id="category-select" style="margin-bottom:10px;"></select>
+
+                <div style="display:flex; gap:10px; margin-bottom:12px;">
+                    <select id="impostor-count">
+                        <option value="1">1 Impostor</option>
+                        <option value="2">2 Impostorów</option>
+                    </select>
+                    <select id="mrwhite-toggle">
+                        <option value="0">Bez Mr White'a</option>
+                        <option value="1">1x Mr White 🕵️‍♂️</option>
+                    </select>
+                </div>
+
+                <button class="btn" onclick="startGame()">GRAJ TERAZ</button>
+            </div>
+
+            <!-- EKRAN 2: ODKRYWANIE KARTY -->
+            <div id="reveal-screen" class="screen">
+                <div style="text-align:center; margin-bottom: 4px;">
+                    <div style="font-size:0.85rem; color:var(--text-muted); text-transform:uppercase;">Przekaż telefon dla:</div>
+                    <div id="current-player-name" style="font-size:2rem; font-weight:900; color:var(--accent-pink);"></div>
+                </div>
+
+                <div class="card-view-container" id="card-container">
+                    <div class="card-inner-content" id="card-inner">
+                        <div class="result-view">
+                            <div class="role-icon-lg" id="role-icon">👥</div>
+                            <div class="role-title-styled" id="role-title">Cywil</div>
+                            <div class="role-desc-styled" id="role-desc">
+                                Twoje słowo to:
+                                <span id="secret-value">"Loch"</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sliding-cover" id="sliding-cover">
+                        <div class="cover-top-text">Gracz</div>
+                        <div class="cover-avatars-box">👥🕵️‍♂️</div>
+                        <div class="swipe-hint-box">
+                            Przesuń, by odkryć słowo. Uważaj na Impostorów! 👀
+                            <span class="arrow-anim">▲</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="next-btn" class="btn" onclick="nextPlayer()" style="display:none; background: #10b981;">Następny gracz</button>
+            </div>
+
+            <!-- EKRAN 3: DYSKUSJA -->
+            <div id="start-discussion-screen" class="screen">
+                <div class="game-title">DYSKUSJA</div>
+                <div class="subtitle">ZDEMASKUJCIE SZPIEGA!</div>
+
+                <div class="starter-card">
+                    <div style="font-size:0.9rem; color:var(--text-muted); font-weight:700;">ZACZYNA:</div>
+                    <div id="starter-player-name" class="starter-name">---</div>
+                </div>
+
+                <p style="text-align:center; color:var(--text-muted); font-size:0.95rem; line-height:1.5;">
+                    Przekaż urządzenie następnemu graczowi.
+                </p>
+
+                <div style="margin-top:auto;">
+                    <button class="btn" onclick="replaysameGame()" style="margin-bottom:10px;">ZAGRAJ PONOWNIE</button>
+                    <button class="btn" onclick="resetGame()" style="background:#374151;">MENU GŁÓWNE</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const categories = {
+            "any": { name: "🎲 Wszystko (Losowe hasła)" },
+            "food": { name: "🍕 Jedzenie & Napoje (200)" },
+            "places": { name: "📍 Miejsca i Lokacje (200)" },
+            "objects": { name: "📦 Przedmioty & Gadżety (200)" },
+            "popculture": { name: "🎬 Popkultura & Filmy (200)" },
+            "halloween": { name: "🎃 Halloween" },
+            "christmas": { name: "🎄 Boże Narodzenie" },
+            "easter": { name: "🐣 Wielkanoc" }
+        };
+
+        const dynamicDatabase = {
+            food: [
+                { word: "Pizza", clueList: ["Trójkąt", "Włochy", "Ser", "Piec", "Sos"] },
+                { word: "Burger", clueList: ["Bułka", "Mięso", "Warstwy", "Sosy", "Fastfood"] },
+                { word: "Lody", clueList: ["Wafelek", "Mróz", "Gałka", "Słodkie", "Lato"] },
+                { word: "Kawa", clueList: ["Kofeina", "Filiżanka", "Rano", "Aromat", "Czarna"] },
+                { word: "Sushi", clueList: ["Rulon", "Rybka", "Japonia", "Ryż", "Pałeczki"] },
+                { word: "Czekolada", clueList: ["Kostka", "Kakao", "Słodycze", "Tabliczka", "Deser"] },
+                { word: "Frytki", clueList: ["Sól", "Ziemniak", "Chrupiące", "Smażenie", "Fastfood"] },
+                { word: "Kebab", clueList: ["Baranina", "Ostry", "Sos", "Mięso", "Rurkowa"] },
+                { word: "Spaghetti", clueList: ["Widelec", "Makaron", "Sos", "Włochy", "Danie"] },
+                { word: "Arbuz", clueList: ["Pestka", "Zielony", "Słodki", "Duży", "Woda"] },
+                { word: "Banan", clueList: ["Skórka", "Żółty", "Małpa", "Słodki", "Prosty"] },
+                { word: "Jabłko", clueList: ["Królewna", "Czerwone", "Drzewo", "Zdrowe", "Sok"] },
+                { word: "Pierogi", clueList: ["Farsz", "Ciasto", "Gotowanie", "Tradycja", "Lepił"] },
+                { word: "Rosół", clueList: ["Niedziela", "Makaron", "Zupa", "Kura", "Złoty"] },
+                { word: "Schabowy", clueList: ["Panierka", "Kotlet", "Młotek", "Obiad", "Mięso"] },
+                { word: "Ser", clueList: ["Dziury", "Mleko", "Krowa", "Żółty", "Klin"] },
+                { word: "Mleko", clueList: ["Krowa", "Białe", "Szklanka", "Wapń", "Picie"] },
+                { word: "Jajko", clueList: ["Skorupka", "Żółtko", "Kurczak", "Śniadanie", "Białko"] },
+                { word: "Naleśnik", clueList: ["Patelnia", "Ciasto", "Smarowanie", "Zwijanie", "Ciepły"] },
+                { word: "Gofr", clueList: ["Kratka", "Bita śmietana", "Chrupiący", "Cukier", "Morze"] },
+                { word: "Tort", clueList: ["Świeczka", "Urodziny", "Krem", "Impreza", "Krójenie"] },
+                { word: "Masło", clueList: ["Smarowanie", "Chleb", "Żółte", "Lodówka", "Krowa"] },
+                { word: "Miód", clueList: ["Pszczoła", "Ul", "Słodki", "Lepki", "Złoty"] },
+                { word: "Truskawka", clueList: ["Szypułka", "Czerwona", "Drobinki", "Lato", "Krzak"] },
+                { word: "Ananas", clueList: ["Korona", "Tropiki", "Kolczasty", "Słodki", "Kwadraty"] },
+                { word: "Żurek", clueList: ["Kiszony", "Biała kiełbasa", "Majeranek", "Chleb", "Zupa"] },
+                { word: "Barszcz", clueList: ["Burak", "Czerwony", "Czysty", "Wigilia", "Uszka"] },
+                { word: "Zapiekanka", clueList: ["Baguette", "Pieczarki", "Ciągnący ser", "Keczup", "Ulica"] },
+                { word: "Ramen", clueList: ["Miska", "Makaron", "Japoński", "Bulion", "Łyżka"] },
+                { word: "Tacos", clueList: ["Muszla", "Meksyk", "Chrupkie", "Farsz", "Ostre"] },
+                { word: "Ogórek", clueList: ["Zielony", "Woda", "Kwaszenie", "Sałatka", "Chrupiący"] },
+                { word: "Pomidor", clueList: ["Czerwony", "Sok", "Krzak", "Zupa", "Kanapek"] },
+                { word: "Ziemniak", clueList: ["Mundurek", "Bulwa", "Purée", "Koperek", "Obiad"] },
+                { word: "Marchew", clueList: ["Królik", "Pomarańczowa", "Chrupka", "Sok", "Wzrok"] },
+                { word: "Czosnek", clueList: ["Ząbek", "Wampir", "Ostry", "Zapach", "Zdrowie"] },
+                { word: "Cebula", clueList: ["Łzy", "Warstwy", "Smażenie", "Zapach", "Łupina"] },
+                { word: "Papryka", clueList: ["Ostrość", "Kolorowa", "Farsz", "Chrupiąca", "Witamina"] },
+                { word: "Brokuł", clueList: ["Drzewko", "Zielony", "Różyczki", "Zdrowy", "Gotowanie"] },
+                { word: "Orzech", clueList: ["Dziadek", "Skorupka", "Twardy", "Wiewiórka", "Łupina"] },
+                { word: "Szampan", clueList: ["Korek", "Bąbelki", "Sylwester", "Kieliszek", "Impreza"] },
+                { word: "Piwo", clueList: ["Piana", "Złoty", "Kufel", "Chmiel", "Impreza"] },
+                { word: "Wino", clueList: ["Kieliszek", "Winogrona", "Korek", "Czerwone", "Kolacja"] },
+                { word: "Sok", clueList: ["Słomka", "Karton", "Owoce", "Szklanka", "Słodki"] },
+                { word: "Woda", clueList: ["Pragnienie", "Przezroczysta", "Butelka", "Źródło", "Życie"] },
+                { word: "Łosoś", clueList: ["Różowy", "Rzeka", "Sushi", "Ryba", "Dymiony"] },
+                { word: "Krewetka", clueList: ["Ogon", "Morze", "Różowa", "Owoce morza", "Patelnia"] },
+                { word: "Kiełbasa", clueList: ["Ognisko", "Grill", "Pętko", "Mięso", "Wędlina"] },
+                { word: "Bigos", clueList: ["Kapusta", "Mięso", "Garnek", "Myśliwski", "Długi"] },
+                { word: "Kopytka", clueList: ["Sos", "Ziemniaki", "Kształt", "Obiad", "Miękkie"] },
+                { word: "Lazania", clueList: ["Mielone", "Włochy", "Płaty", "Piekarnik", "Sos"] },
+                { word: "Hummus", clueList: ["Ciecierzyca", "Pasta", "Bliski Wschód", "Sezam", "Smarowanie"] },
+                { word: "Guacamole", clueList: ["Avocado", "Zielone", "Meksyk", "Dip", "Chipsy"] },
+                { word: "Nachos", clueList: ["Dip", "Trójkąty", "Kukurydza", "Kino", "Chrupiące"] },
+                { word: "Rogalik", clueList: ["Nadzienie", "Francuski", "Księżyc", "Masło", "Śniadanie"] },
+                { word: "Bułka", clueList: ["Przedziałka", "Pieczywo", "Sklep", "Śniadanie", "Kajzerka"] },
+                { word: "Ciastko", clueList: ["Kruszonka", "Słodkie", "Piekarnia", "Kawa", "Deser"] },
+                { word: "Smalec", clueList: ["Skwarki", "Chleb", "Ogórek", "Tradycja", "Tłuszcz"] },
+                { word: "Marmolada", clueList: ["Słoik", "Owoce", "Słodka", "Pączek", "Smarowanie"] },
+                { word: "Dżem", clueList: ["Owoce", "Słoik", "Łyżeczka", "Słodki", "Poranek"] },
+                { word: "Budyń", clueList: ["Kożuch", "Mleko", "Waniliowy", "Miseczka", "Ciepły"] },
+                { word: "Galaretka", clueList: ["Trzęsienie", "Deser", "Kolorowa", "Owocowa", "Pucharek"] },
+                { word: "Golonka", clueList: ["Chrzan", "Piwo", "Kość", "Obiad", "Tradycyjna"] },
+                { word: "Malina", clueList: ["Drobinki", "Krzak", "Słodka", "Czerwona", "Syrop"] },
+                { word: "Borówka", clueList: ["Jagoda", "Las", "Niebieska", "Krzaczek", "Plamy"] },
+                { word: "Śliwka", clueList: ["Pestka", "Kompot", "Granatowa", "Powidła", "Drzewo"] },
+                { word: "Gruszka", clueList: ["Żarówka", "Słodka", "Zielona", "Kształt", "Sok"] },
+                { word: "Brzoskwinia", clueList: ["Meszak", "Słodka", "Pestka", "Puchata", "Letnia"] },
+                { word: "Twaróg", clueList: ["Klin", "Biały", "Serek", "Mleko", "Talerz"] },
+                { word: "Oscypek", clueList: ["Góry", "Wędzony", "Owczy", "Zakopane", "Żurawina"] },
+                { word: "Kefir", clueList: ["Grzybki", "Biały", "Butelka", "Kwaśny", "Nabiał"] },
+                { word: "Jogurt", clueList: ["Łyżeczka", "Owocowy", "Kubek", "Gęsty", "Śniadanie"] },
+                { word: "Majonez", clueList: ["Sałatka", "Słoik", "Gęsty", "Jajka", "Kanapka"] },
+                { word: "Musztarda", clueList: ["Gorczyca", "Ostra", "Słoik", "Kiełbasa", "Żółta"] },
+                { word: "Ketchup", clueList: ["Pomidory", "Butelka", "Czerwony", "Frytki", "Słodki"] },
+                { word: "Chrzan", clueList: ["Pieczenie", "Ostry", "Spojrzenie", "Wielkanoc", "Biały"] },
+                { word: "Ocet", clueList: ["Zapach", "Kwas", "Butelka", "Marynata", "Ostry"] },
+                { word: "Cukier", clueList: ["Kryształek", "Słodki", "Biały", "Kawa", "Sypki"] },
+                { word: "Sól", clueList: ["Kopalnia", "Biała", "Słona", "Zupa", "Przyprawa"] },
+                { word: "Pieprz", clueList: ["Młynek", "Czarny", "Ostrość", "Ziarna", "Szczypta"] },
+                { word: "Kakao", clueList: ["Proszek", "Mleko", "Ciepłe", "Brązowe", "Kubek"] },
+                { word: "Baton", clueList: ["Słodycze", "Czekolada", "Sklep", "Przekąska", "Orzechy"] },
+                { word: "Wafel", clueList: ["Przekładaniec", "Masa", "Chrupki", "Płaski", "Deser"] },
+                { word: "Panna cotta", clueList: ["Włochy", "Śmietanka", "Deser", "Truskawki", "Zimna"] },
+                { word: "Tiramisu", clueList: ["Kawa", "Biszkopt", "Mascarpone", "Włochy", "Kakao"] },
+                { word: "Brownie", clueList: ["Czekolada", "Ciasto", "Wilgotne", "Kwadrat", "Orzechy"] },
+                { word: "Sernik", clueList: ["Twaróg", "Ciasto", "Rodzynki", "Kruszonka", "Piekarnik"] },
+                { word: "Szarlotka", clueList: ["Jabłka", "Cynamon", "Ciasto", "Kruszonka", "Ciepła"] },
+                { word: "Babeczka", clueList: ["Foremka", "Krem", "Muffinka", "Kolorowa", "Słodka"] },
+                { word: "Lizak", clueList: ["Patyk", "Kolorowy", "Słodki", "Koleko", "Dzieci"] },
+                { word: "Guma", clueList: ["Żucie", "Balon", "Miętowa", "Słodycz", "Kieszeń"] },
+                { word: "Słonecznik", clueList: ["Ziarna", "Łupanie", "Żółty", "Kwiat", "Przekąska"] },
+                { word: "Pestki dyni", clueList: ["Zielone", "Łuskanie", "Pieczone", "Chrupkie", "Sałatka"] },
+                { word: "Kminek", clueList: ["Przyprawa", "Chleb", "Małe", "Zapach", "Ziarenka"] },
+                { word: "Majeranek", clueList: ["Zupa", "Rosół", "Zioło", "Suszony", "Zielony"] },
+                { word: "Bazylia", clueList: ["Pesto", "Włochy", "Zielona", "Zioło", "Świeża"] },
+                { word: "Oregano", clueList: ["Pizza", "Zioło", "Suszone", "Danie", "Pachnące"] },
+                { word: "Imbir", clueList: ["Ostry", "Korzeń", "Herbata", "Azja", "Rozgrzewający"] },
+                { word: "Goździki", clueList: ["Korzenne", "Zapach", "Kompot", "Kształt", "Święta"] },
+                { word: "Wanilia", clueList: ["Laska", "Aromat", "Słodka", "Deser", "Krem"] },
+                { word: "Karmel", clueList: ["Cukier", "Topiony", "Brązowy", "Słodki", "Polewa"] },
+                { word: "Sok pomarańczowy", clueList: ["Cytrus", "Szklanka", "Rano", "Witaminy", "Śniadanie"] },
+                { word: "Kompot", clueList: ["Wigilia", "Owoce", "Garnek", "Tradycyjny", "Słodki"] },
+                { word: "Pepsi", clueList: ["Gaz", "Cola", "Puszka", "Czarny", "Lodowaty"] },
+                { word: "Sprite", clueList: ["Cytryna", "Gazowany", "Zielona butelka", "Orzeźwienie", "Przezroczysty"] },
+                { word: "Fanta", clueList: ["Pomarańczowa", "Gaz", "Słodka", "Puszka", "Orzeźwienie"] },
+                { word: "Woda gazowana", clueList: ["Bąbelki", "Butelka", "Orzeźwienie", "Gaz", "Szklanka"] },
+                { word: "Herbata zielona", clueList: ["Liście", "Azja", "Zdrowa", "Napar", "Ciepła"] },
+                { word: "Kakao rozpuszczalne", clueList: ["Mleko", "Kubek", "Dzieci", "Słodkie", "Proszek"] },
+                { word: "Smoothie", clueList: ["Blendowanie", "Owoce", "Gęste", "Kubek", "Zdrowe"] },
+                { word: "Shake", clueList: ["Lody", "Mleko", "Słomka", "Gęsty", "Deser"] },
+                { word: "Granola", clueList: ["Owies", "Chrupka", "Mleko", "Jogurt", "Śniadanie"] },
+                { word: "Musli", clueList: ["Płatki", "Bakalie", "Miska", "Mleko", "Zdrowe"] },
+                { word: "Płatki kukurydziane", clueList: ["Żółte", "Mleko", "Chrupiące", "Miska", "Śniadanie"] },
+                { word: "owsianka", clueList: ["Mleko", "Gotowanie", "Gęsta", "Zdrowa", "Rano"] },
+                { word: "Omlet", clueList: ["Jajka", "Patelnia", "Puszysty", "Farsz", "Śniadanie"] },
+                { word: "Tost", clueList: ["Opiekacz", "Ser", "Szynka", "Chrupiący", "Ciepły"] },
+                { word: "Grzanka", clueList: ["Patelnia", "Masło", "Chleb", "Chrupiąca", "Zupa"] },
+                { word: "Kajzerka", clueList: ["Bułka", "Krzyżyk", "Świeża", "Pieczywo", "Chrupiąca"] },
+                { word: "Bagietka", clueList: ["Długa", "Francuska", "Piekarnia", "Chrupiąca", "Miękka"] },
+                { word: "Ciabatta", clueList: ["Włoska", "Dziurki", "Puszysta", "Oliwa", "Pieczywo"] },
+                { word: "Pumpernikiel", clueList: ["Ciemny", "Razowy", "Gęsty", "Chleb", "Zdrowy"] },
+                { word: "Tortilla", clueList: ["Plac", "Zwijanie", "Farsz", "Meksyk", "Pszenna"] },
+                { word: "Burrito", clueList: ["Farsz", "Mięso", "Zwinięte", "Meksyk", "Ciepłe"] },
+                { word: "Krokiet", clueList: ["Panierka", "Farsz", "Naleśnik", "Barszcz", "Smażony"] },
+                { word: "Pasztecik", clueList: ["Ciasto kruche", "Farsz", "Barszcz", "Ciepły", "Przekąska"] },
+                { word: "Piernik", clueList: ["Korzenny", "Święta", "Miód", "Pieczenie", "Lukier"] },
+                { word: "Makowiec", clueList: ["Mak", "Ciasto", "Święta", "Biały", "Zawijanie"] },
+                { word: "Keks", clueList: ["Bakalie", "Ciasto", "Wypiek", "Słodki", "Krojenie"] },
+                { word: "Babka drożdżowa", clueList: ["Wysoka", "Forma", "Lukier", "Wielkanoc", "Puszysta"] },
+                { word: "Faworki", clueList: ["Chrust", "Cukier puder", "Karnawał", "Kruche", "Smażone"] },
+                { word: "Pączek", clueList: ["Lukier", "Róża", "Smażenie", "Tłusty czwartek", "Dżem"] },
+                { word: "Donut", clueList: ["Dziurka", "Polewa", "Kolorowy", "Amerykański", "Słodki"] },
+                { word: "Muffin", clueList: ["Babeczka", "Papier", "Puchaty", "Słodki", "Kruszonka"] },
+                { word: "Brownie", clueList: ["Czekolada", "Kwadrat", "Wilgotne", "Orzechy", "Deser"] },
+                { word: "Pancakes", clueList: ["Amerykańskie", "Syrop klonowy", "Puszyste", "Stos", "Patelnia"] },
+                { word: "Twarożek", clueList: ["Rzodkiewka", "Szczypiorek", "Biały", "Śmietana", "Kanapka"] },
+                { word: "Serek wiejski", clueList: ["Ziarna", "Śmietanka", "Kubek", "Biały", "Zdrowy"] },
+                { word: "Serek homogenizowany", clueList: ["Waniliowy", "Gładki", "Kubek", "Dzieci", "Słodki"] },
+                { word: "Maślanka", clueList: ["Nabiał", "Butelka", "Orzeźwienie", "Kwaśna", "Krowa"] },
+                { word: "Zasmażka", clueList: ["Masło", "Mąka", "Zupa", "Patelnia", "Gęste"] },
+                { word: "Zupa pomidorowa", clueList: ["Makaron", "Czerwona", "Śmietana", "Dzieci", "Obiad"] },
+                { word: "Zupa ogórkowa", clueList: ["Kiszony", "Ziemniaki", "Kwaśna", "Koper", "Obiad"] },
+                { word: "Krupnik", clueList: ["Kasza jęczmienna", "Warzywa", "Ziemniaki", "Zupa", "Tradycyjna"] },
+                { word: "Gulasz", clueList: ["Mięso", "Sos", "Papryka", "Garnek", "Ciepły"] },
+                { word: "Kotlet mielony", clueList: ["Mięso mielone", "Bułka tarta", "Patelnia", "Obiad", "Ziemniaki"] },
+                { word: "Gołąbki", clueList: ["Kapusta", "Ryż", "Mięso", "Sos pomidorowy", "Garnek"] },
+                { word: "Placki ziemniaczane", clueList: ["Ziemniaki", "Tarcie", "Smażenie", "Chrupiące", "Śmietana"] },
+                { word: "Filet z kurczaka", clueList: ["Drób", "Obiad", "Panierka", "Zdrowy", "Smażenie"] },
+                { word: "Skrzydełka", clueList: ["Kurczak", "Pikantne", "Grill", "Palce", "Chrupiące"] },
+                { word: "Udo z kurczaka", clueList: ["Mięso", "Piekarnik", "Chrupiąca skórka", "Obiad", "Kość"] },
+                { word: "Karkówka", clueList: ["Grill", "Marynata", "Tłusta", "Mięso", "Kawałki"] },
+                { word: "Stek", clueList: ["Wołowina", "Krwisty", "Patelnia", "Gruby", "Restauracja"] },
+                { word: "Tatar", clueList: ["Wołowina", "Surowe", "Żółtko", "Cebulka", "Przystawka"] },
+                { word: "Carpaccio", clueList: ["Cienkie", "Wołowina", "Rukola", "Parmezan", "Włochy"] },
+                { word: "Risotto", clueList: ["Ryż", "Włochy", "Kremowe", "Patelnia", "Bulion"] },
+                { word: "Paella", clueList: ["Hiszpania", "Ryż", "Owoce morza", "Żółta", "Patelnia"] },
+                { word: "Falafel", clueList: ["Ciecierzyca", "Kulki", "Smażone", "Wege", "Pita"] },
+                { word: "Klocek tofu", clueList: ["Soja", "Wege", "Biały", "Kostka", "Patelnia"] },
+                { word: "Seitan", clueList: ["Pszenica", "Wege", "Mięso roślinne", "Białko", "Kotlet"] },
+                { word: "Kaszanka", clueList: ["Kasza", "Krew", "Gryczana", "Ognisko", "Czarna"] },
+                { word: "Flaki", clueList: ["Podroby", "Zupa", "Rozgrzewająca", "Impreza", "Tradycyjna"] },
+                { word: "Salceson", clueList: ["Wędlina", "Galareta", "Krojenie", "Wieprzowina", "Plastry"] },
+                { word: "Kabanos", clueList: ["Cienki", "Suchy", "Kiełbasa", "Przekąska", "Długi"] },
+                { word: "Parówka", clueList: ["Śniadanie", "Woda", "Gorąca", "Dzieci", "Szybka"] },
+                { word: "Wędlina", clueList: ["Kanapka", "Plastry", "Sklep", "Lodówka", "Szynka"] },
+                { word: "Pasztet", clueList: ["Piekarnik", "Foremka", "Mięso", "Smarowanie", "Święta"] }
+            ],
+            places: [
+                { word: "Plaża", clueList: ["Mewy", "Piasek", "Morze", "Słońce", "Fale"] },
+                { word: "Szkoła", clueList: ["Korytarz", "Dzwonek", "Uczeń", "Lekcja", "Tablica"] },
+                { word: "Samolot", clueList: ["Okienko", "Skrzydło", "Niebo", "Lot", "Chmury"] },
+                { word: "Kawiarnia", clueList: ["Aromat", "Stolik", "Kelner", "Kawa", "Rozmowa"] },
+                { word: "Szpital", clueList: ["Oddział", "Lekarz", "Bandaż", "Chory", "Leki"] },
+                { word: "Siłownia", clueList: ["Lustra", "Ciężary", "Pot", "Maszyny", "Trening"] },
+                { word: "Kino", clueList: ["Ciemność", "Ekran", "Popcorn", "Film", "Fotel"] },
+                { word: "Basen", clueList: ["Kafelki", "Woda", "Okulary", "Pływanie", "Mokro"] },
+                { word: "Biblioteka", clueList: ["Cisza", "Książki", "Regał", "Cisza", "Lektura"] },
+                { word: "Góry", clueList: ["Szczyt", "Plecak", "Snieg", "Szlaki", "Wysokość"] },
+                { word: "Las", clueList: ["Mech", "Drzewa", "Grzyby", "Cisza", "Jagody"] },
+                { word: "Zamek", clueList: ["Mury", "Księżniczka", "Fosa", "Rycerz", "Wieża"] },
+                { word: "Stadion", clueList: ["Murawa", "Kibice", "Bramka", "Mecz", "Trybuny"] },
+                { word: "Dworzec", clueList: ["Peron", "Pociąg", "Bilet", "Rozkład", "Podróż"] },
+                { word: "Pustynia", clueList: ["Wydma", "Piasek", "Kaktus", "Gorąco", "Wielbłąd"] },
+                { word: "Jaskinia", clueList: ["Nietoperz", "Ciemność", "Stalaktyt", "Skała", "Echo"] },
+                { word: "Teatr", clueList: ["Kurtyna", "Scena", "Widownia", "Bilety", "Aktorzy"] },
+                { word: "Więzienie", clueList: ["Kraty", "Strażnik", "Cel", "Przestępca", "Mury"] },
+                { word: "Kościół", clueList: ["Dzwon", "Ołtarz", "Modlitwa", "Ławki", "Ksiądz"] },
+                { word: "Cmentarz", clueList: ["Znicz", "Groby", "Kwiaty", "Spokój", "Kamień"] },
+                { word: "Apteka", clueList: ["Recepta", "Leki", "Farmaceuta", "Kolejka", "Syrop"] },
+                { word: "Piekarnia", clueList: ["Pieca", "Chleb", "Zapach", "Świeże", "Bułki"] },
+                { word: "Sklep", clueList: ["Kasa", "Wózki", "Półki", "Zakupy", "Towar"] },
+                { word: "Hotel", clueList: ["Recepcja", "Klucz", "Pokoje", "Bagaż", "Łóżko"] },
+                { word: "Pralnia", clueList: ["Bęben", "Proszek", "Pranie", "Woda", "Wirówki"] },
+                { word: "Warsztat", clueList: ["Klucz", "Samochód", "Mechanik", "Smar", "Naprawa"] },
+                { word: "Kopalnia", clueList: ["Wagonik", "Węgiel", "Ciemność", "Kask", "Głęboko"] },
+                { word: "Elektrownia", clueList: ["Prąd", "Komin", "Energia", "Sieć", "Turbina"] },
+                { word: "Fabryka", clueList: ["Taśma", "Produkcja", "Hala", "Pracownicy", "Maszyny"] },
+                { word: "Farma", clueList: ["Stodoła", "Zwierzęta", "Traktor", "Pole", "Wieś"] },
+                { word: "Zoo", clueList: ["Wybieg", "Zwierzęta", "Bilety", "Małpy", "Klatki"] },
+                { word: "Akwarium", clueList: ["Szyba", "Rybki", "Woda", "Koralowce", "Tunel"] },
+                { word: "Cyrk", clueList: ["Namiot", "Klaun", "Akrobata", "Zwierzęta", "Oklaski"] },
+                { word: "Klub", clueList: ["Parkiet", "Muzyka", "Bouncer", "Światła", "Tłum"] },
+                { word: "Kasyno", clueList: ["Ruletka", "Karty", "Żetony", "Pieniądze", "Las Vegas"] },
+                { word: "Pocztowy", clueList: ["Okienko", "List", "Paczka", "Znczek", "Kolejka"] },
+                { word: "Bank", clueList: ["Sejf", "Pieniądze", "Konto", "Ochrona", "Gotówka"] },
+                { word: "Ratusz", clueList: ["Prezydent", "Miasto", "Urząd", "Rynek", "Gabinety"] },
+                { word: "Sad", clueList: ["Owoce", "Drzewa", "Jabłonie", "Zbiory", "Gałęzie"] },
+                { word: "Wulkan", clueList: ["Lawa", "Ogień", "Krater", "Erupcja", "Popiół"] },
+                { word: "Wodospad", clueList: ["Szum", "Spadek", "Woda", "Skały", "Piana"] },
+                { word: "Rzeka", clueList: ["Nurt", "Brzeg", "Most", "Wędkarz", "Prąd"] },
+                { word: "Jezioro", clueList: ["Kajak", "Woda", "Trzciny", "Plaża", "Żaglówka"] },
+                { word: "Ocean", clueList: ["Fale", "Głębia", "Wieloryb", "Słona woda", "Horyzont"] },
+                { word: "Wyspa", clueList: ["Palma", "Otoczona wodą", "Piasek", "Samotność", "Tropiki"] },
+                { word: "Statek", clueList: ["Pokład", "Kotwica", "Kapitan", "Morze", "Kajuty"] },
+                { word: "Łódź podwodna", clueList: ["Peryskop", "Głębia", "Metal", "Torpeda", "Zanurzenie"] },
+                { word: "Stacja kosmiczna", clueList: ["Nieważkość", "Orbita", "Astronauta", "Kosmos", "Panele"] },
+                { word: "Księżyc", clueList: ["Krater", "Noc", "Srebrny", "Orbita", "Fazy"] },
+                { word: "Mars", clueList: ["Czerwony", "Planeta", "Kosmos", "Łazik", "Pustynia"] },
+                { word: "Dżungla", clueList: ["Liana", "Gęstewka", "Małpy", "Wilgoć", "Tropiki"] },
+                { word: "Bagno", clueList: ["Muł", "Trzęsawisko", "Żaby", "Moczary", "Woda"] },
+                { word: "Pole", clueList: ["Traktor", "Zboże", "Orka", "Przestrzeń", "Wieś"] },
+                { word: "Wioska", clueList: ["Kogut", "Domy", "Spokój", "Pola", "Sołtys"] },
+                { word: "Wieżowiec", clueList: ["Winda", "Wysokość", "Szkło", "Biura", "Piętra"] },
+                { word: "Balkon", clueList: ["Balustrada", "Widok", "Mieszkanie", "Kwiaty", "Wyjście"] },
+                { word: "Piwnica", clueList: ["Ziemniaki", "Słoiki", "Ciemno", "Klucz", "Dół"] },
+                { word: "Strych", clueList: ["Klamoty", "Kurz", "Belki", "Poddasze", "Pudełka"] },
+                { word: "Garaż", clueList: ["Brama", "Samochód", "Narzędzia", "Beton", "Parkowanie"] },
+                { word: "Ogród", clueList: ["Kosiarka", "Kwiaty", "Trawa", "Ziemia", "Pielenie"] },
+                { word: "Kuchnia", clueList: ["Zlew", "Kuchenka", "Lodówka", "Jedzenie", "Blat"] },
+                { word: "Łazienka", clueList: ["Prysznic", "Wanna", "Lustro", "Umywalka", "Ręcznik"] },
+                { word: "Sypialnia", clueList: ["Łóżko", "Sen", "Szafa", "Poduszka", "Cisza"] },
+                { word: "Biuro", clueList: ["Biurko", "Komputer", "Fotel", "Praca", "Dokumenty"] },
+                { word: "Saloon", clueList: ["Drzwi", "Kowboje", "Whisky", "Fort", "Fortepian"] },
+                { word: "Baza wojskowa", clueList: ["Przepustka", "Żołnierze", "Mundur", "Bramy", "Czołgi"] },
+                { word: "Bunkier", clueList: ["Beton", "Schron", "Grube ściany", "Bezpieczeństwo", "Zejście"] },
+                { word: "Latarnia morska", clueList: ["Światło", "Wybrzeże", "Skały", "Statki", "Wysoka wieża"] },
+                { word: "Port", clueList: ["Cumowanie", "Statki", "Żuraw", "Wybrzeże", "Dok"] },
+                { word: "Przystań", clueList: ["Pomost", "Łódź", "Woda", "Kajaki", "Słupki"] },
+                { word: "Targowisko", clueList: ["Stragan", "Warzywa", "Klienci", "Targowanie", "Namioty"] },
+                { word: "Polana", clueList: ["Jagody", "Drzewa", "Trawa", "Słońce", "Las"] },
+                { word: "Jaskinia lodowa", clueList: ["Sople", "Zimno", "Lód", "Błękit", "Grota"] },
+                { word: "Tundra", clueList: ["Mroźny", "Płaska", "Zimno", "Śnieg", "Brak drzew"] },
+                { word: "Oaza", clueList: ["Woda", "Pustynia", "Palmy", "Zielono", "Życie"] },
+                { word: "Autostrada", clueList: ["Płatny", "Szybko", "Pas", "Samochody", "Węzeł"] },
+                { word: "Skrzyżowanie", clueList: ["Sygnalizacja", "Droga", "Pasy", "Auta", "Światła"] },
+                { word: "Most", clueList: ["Przęsło", "Rzeka", "Przeprawa", "Filary", "Asfalt"] },
+                { word: "Tunel", clueList: ["Przejazd", "Ciemno", "Góra", "Samochody", "Światło"] },
+                { word: "Parking", clueList: ["Bilet", "Auta", "Miejsca", "Szlaban", "Kierowca"] },
+                { word: "Przystanek", clueList: ["Rozkład", "Autobus", "Ławka", "Czekanie", "Wwiata"] },
+                { word: "Metro", clueList: ["Wagon", "Pod ziemią", "Tunel", "Stacja", "Tory"] },
+                { word: "Kwiaciarnia", clueList: ["Bukiet", "Kwiaty", "Wstążka", "Zapach", "Wazon"] },
+                { word: "Jubiler", clueList: ["Pierścionek", "Złoto", "Diamenty", "Gablota", "Drogo"] },
+                { word: "Fryzjer", clueList: ["Fotel", "Nożyczki", "Lustro", "Włosy", "Suszarka"] },
+                { word: "Kosmetyczka", clueList: ["Paznokcie", "Maseczka", "Zabieg", "Krem", "Fotel"] },
+                { word: "Sauna", clueList: ["Para", "Drewno", "Gorąco", "Ręcznik", "Pocenie"] },
+                { word: "Solarium", clueList: ["Tuba", "Lampa", "Opalanie", "Okulary", "Leżenie"] },
+                { word: "Kręgielnia", clueList: ["Kule", "Kręgle", "Tor", "Buty", "Strike"] },
+                { word: "Lodowisko", clueList: ["Łyżwy", "Lód", "Zima", "Banda", "Ostrza"] },
+                { word: "Kort tenisowy", clueList: ["Siatka", "Rakieta", "Piłka", "Mączka", "Set"] },
+                { word: "Pole golfowe", clueList: ["Dołek", "Kij", "Piłka", "Trawa", "Wózek"] },
+                { word: "Skatepark", clueList: ["Rampa", "Deskorolka", "Hulajnoga", "Beton", "Skok"] },
+                { word: "Strych", clueList: ["Pudełka", "Kurz", "Dach", "Klamoty", "Pająki"] },
+                { word: "Balkon", clueList: ["Poręcz", "Widok", "Pranie", "Kawka", "Blok"] },
+                { word: "Windsurfing", clueList: ["Żagiel", "Deska", "Wiatr", "Woda", "Fala"] },
+                { word: "Kawiarnia", clueList: ["Stolik", "Kelner", "Deser", "Mus", "Ciastko"] },
+                { word: "Restauracja", clueList: ["Rachunek", "Kelner", "Menu", "Danie", "Stolik"] },
+                { word: "Schody", clueList: ["Stopnie", "Poręcz", "Piętro", "Wchodzenie", "Klatka"] },
+                { word: "Winda", clueList: ["Przyciski", "Drzwi", "Jazda", "Szyb", "Piętra"] },
+                { word: "Korytarz", clueList: ["Drzwi", "Ściany", "Przejście", "Długi", "Hotel"] },
+                { word: "Brama", clueList: ["Wjazd", "Ogrodzenie", "Otwieranie", "Pilot", "Podwórko"] },
+                { word: "Podwórko", clueList: ["Ławka", "Piłka", "Dzieci", "Blok", "Asfalt"] },
+                { word: "Plac zabaw", clueList: ["Zjeżdżalnia", "Huśtawka", "Piaskownica", "Dzieci", "Drabinki"] },
+                { word: "Boisko", clueList: ["Bramki", "Orlik", "Piłka", "Kibice", "Bieganie"] },
+                { word: "Bieżnia", clueList: ["Lekkoatletyka", "Kółka", "Bieganie", "Sport", "Czas"] },
+                { word: "Skocznia narciarska", clueList: ["Narty", "Belka", "Lot", "Śnieg", "Adrenalin"] },
+                { word: "Lodowiec", clueList: ["Lód", "Szczelina", "Zimno", "Topnienie", "Góry"] },
+                { word: "Kanion", clueList: ["Skały", "Przepaść", "Rzeka", "Wielki", "Erozja"] },
+                { word: "Dolina", clueList: ["Góry", "Rzeka", "Nizina", "Zielono", "Spokój"] },
+                { word: "Szczyt", clueList: ["Góra", "Flaga", "Widok", "Koniec", "Wspinaczka"] },
+                { word: "Przełęch", clueList: ["Góry", "Droga", "Między szczytami", "Wiatr", "Przejście"] },
+                { word: "Zatoka", clueList: ["Morze", "Brzeg", "Statki", "Spokojna woda", "Port"] },
+                { word: "Półwysep", clueList: ["Woda z trzech stron", "Ląd", "Morze", "Wybrzeże", "Mierzeja"] },
+                { word: "Archipelag", clueList: ["Wyspy", "Morze", "Grupa", "Palm", "Woda"] },
+                { word: "Rafa koralowa", clueList: ["Kolory", "Ryby", "Nurkowanie", "Ocean", "Koral"] },
+                { word: "Dno oceanu", clueList: ["Ciemność", "Ciśnienie", "Muł", "Głębia", "Stworzenia"] },
+                { word: "Gejzer", clueList: ["Woda", "Gorąco", "Wyrzut", "Para", "Wulkanizm"] },
+                { word: "Źródło", clueList: ["Woda", "Początek", "Rzeka", "Ziemia", "Czysta"] },
+                { word: "Staw", clueList: ["Kaczki", "Woda", "Trzciny", "Wędkarz", "Mały"] },
+                { word: "Bagno", clueList: ["Trzcina", "Grzęzawisko", "Mrocznie", "Komary", "Błoto"] },
+                { word: "Moczary", clueList: ["Woda", "Trawa", "Podmokły", "Teren", "Bagno"] },
+                { word: "Step", clueList: ["Trawa", "Przestrzeń", "Wiatr", "Konie", "Płasko"] },
+                { word: "Sawanna", clueList: ["Afryka", "Lwy", "Akacje", "Susza", "Trawa"] },
+                { word: "Tajga", clueList: ["Las", "Świerki", "Syberia", "Zimno", "Drzewa"] },
+                { word: "Zagroda", clueList: ["Zwierzęta", "Płot", "Farma", "Krowy", "Wieś"] },
+                { word: "Stajnia", clueList: ["Konie", "Siano", "Boks", "Zapach", "Zwierzęta"] },
+                { word: "Obora", clueList: ["Krowy", "Mleko", "Gospodarstwo", "Siano", "Zwierzęta"] },
+                { word: "Kurnik", clueList: ["Kury", "Jajka", "Pióra", "Grzęda", "Dźwięk"] },
+                { word: "Chlew", clueList: ["Świnie", "Błoto", "Gospodarstwo", "Jedzenie", "Koryto"] },
+                { word: "Silos", clueList: ["Zboże", "Wysoki", "Metal", "Farma", "Przechowalnia"] },
+                { word: "Młyn", clueList: ["Wiatr", "Mąka", "Ziarno", "Śmigła", "Tradycja"] },
+                { word: "Tartak", clueList: ["Drewno", "Piła", "Deski", "Praca", "Hala"] },
+                { word: "Stocznia", clueList: ["Statki", "Budowa", "Żuraw", "Stal", "Dok"] },
+                { word: "Rafineria", clueList: ["Ropa", "Komin", "Paliwo", "Benzyna", "Przemysł"] },
+                { word: "Huta", clueList: ["Stal", "Ogień", "Żelazo", "Gorąco", "Metal"] },
+                { word: "Schronisko", clueList: ["Góry", "Nocleg", "Herbat", "Turyści", "Łóżka"] },
+                { word: "Ambasada", clueList: ["Dyplomacja", "Państwo", "Flaga", "Pasport", "Budynek"] },
+                { word: "Konsulat", clueList: ["Wizy", "Dokumenty", "Miasto", "Urzędnicy", "Sprawy"] },
+                { word: "Wydział", clueList: ["Uczelnia", "Studia", "Studenci", "Egzaminy", "Profesor"] },
+                { word: "Dziekanat", clueList: ["Podpisy", "Indeks", "Studenci", "Sekretariat", "Uczelnia"] },
+                { word: "Akademik", clueList: ["Studenci", "Pokoje", "Imprezy", "Łóżka", "Wspólny"] },
+                { word: "Stołówka", clueList: ["Obiady", "Tacka", "Jedzenie", "Kolejka", "Stoly"] },
+                { word: "Szatnia", clueList: ["Ubrania", "W-F", "Kluczyk", "Ławki", "Sport"] },
+                { word: "Pokój nauczycielski", clueList: ["Kawa", "Dziennik", "Nauczyciele", "Przerwa", "Biurka"] },
+                { word: "Laboratorium", clueList: ["Probówki", "Nauka", "Eksperyment", "Fartuch", "Chemia"] },
+                { word: "Obserwatorium", clueList: ["Teleskop", "Gwiazdy", "Kopuła", "Noc", "Kosmos"] },
+                { word: "Planetarium", clueList: ["Gwiazdy", "Sufit", "Projektor", "Kosmos", "Seans"] },
+                { word: "Galeria sztuki", clueList: ["Obrazy", "Wystawa", "Sztuka", "Cisza", "Dzieła"] },
+                { word: "Skansen", clueList: ["Zabytki", "Stare chaty", "Muzeum", "Wieś", "Historia"] },
+                { word: "Mauzoleum", clueList: ["Grobowiec", "Pamięć", "Kamień", "Wielka postać", "Pomnik"] },
+                { word: "Amfiteatr", clueList: ["Scena", "Koncert", "Ławki półokrągłe", "Lato", "Widownia"] },
+                { word: "Arena", clueList: ["Koncert", "Sport", "Wydarzenie", "Środek", "Widzowie"] },
+                { word: "Hipodrom", clueList: ["Konie", "Wyścigi", "Tor", "Jazda", "Zakłady"] },
+                { word: "Tor wyścigowy", clueList: ["Samochody", "Formuła 1", "Zakręty", "Szybkość", "Opony"] },
+                { word: "Strzelnica", clueList: ["Broń", "Tarcza", "Huk", "Cel", "Kulki"] },
+                { word: "Przejście podziemne", clueList: ["Schody", "Tunel", "Ulica", "Pieszy", "Beton"] }
+            ],
+            objects: [
+                { word: "Smartfon", clueList: ["Szybka", "Dotyk", "Bateria", "Aplikacja", "Ekran"] },
+                { word: "Zegarek", clueList: ["Wskazówka", "Czas", "Ręka", "Cyferblat", "Tykanie"] },
+                { word: "Samochód", clueList: ["Klakson", "Kierownica", "Koła", "Droga", "Silnik"] },
+                { word: "Rower", clueList: ["Łańcuch", "Pedały", "Kierownica", "Dwa koła", "Siodełko"] },
+                { word: "Lustro", clueList: ["Szkło", "Odbicie", "Twarz", "Rama", "Czystość"] },
+                { word: "Parasol", clueList: ["Krople", "Deszcz", "Rączka", "Czasza", "Rozkładanie"] },
+                { word: "Okulary", clueList: ["Oprawka", "Szkiełka", "Nos", "Wzrok", "Etui"] },
+                { word: "Aparat", clueList: ["Błysk", "Zdjęcie", "Obiektyw", "Przycisk", "Kadr"] },
+                { word: "Laptop", clueList: ["Klawiatura", "Ekran", "Bateria", "Torba", "Myszka"] },
+                { word: "Klucz", clueList: ["Zamek", "Metal", "Otwieranie", "Brelok", "Drzwi"] },
+                { word: "Portfel", clueList: ["Gotówka", "Karty", "Skóra", "Kieszeń", "Monety"] },
+                { word: "Nóż", clueList: ["Ostrze", "Rączka", "Krojenie", "Metal", "Kuchnia"] },
+                { word: "Poduszka", clueList: ["Pióra", "Sen", "Miękkość", "Łóżko", "Poszewka"] },
+                { word: "Odkurzacz", clueList: ["Rura", "Hałas", "Worek", "Kabel", "Kurz"] },
+                { word: "Latarka", clueList: ["Bateria", "Światło", "Mrok", "Przycisk", "Błysk"] },
+                { word: "Słuchawki", clueList: ["Kabel", "Uszy", "Muzyka", "Dźwięk", "Mikrofon"] },
+                { word: "Telewizor", clueList: ["Pilot", "Ekran", "Kanały", "Kabla", "Salon"] },
+                { word: "Konsola", clueList: ["Pad", "Gry", "Telewizor", "Grafika", "Przycisk"] },
+                { word: "Myszka", clueList: ["Klik", "Komputer", "Kabel", "Podkładka", "Ogon"] },
+                { word: "Drukarka", clueList: ["Tusz", "Papier", "Skaner", "Kopia", "Biuro"] },
+                { word: "Pendrive", clueList: ["Pamięć", "USB", "Mały", "Pliki", "Kieszeń"] },
+                { word: "Ładowarka", clueList: ["Wtyczka", "Prąd", "Kabel", "Gniazdko", "Bateria"] },
+                { word: "Plecak", clueList: ["Szelki", "Książki", "Wycieczka", "Zamek", "Plecy"] },
+                { word: "Walizka", clueList: ["Kółka", "Ubrania", "Podróż", "Zamek", "Lotnisko"] },
+                { word: "Butelka", clueList: ["Kapsel", "Plastik", "Woda", "Picie", "Szyjka"] },
+                { word: "Kubek", clueList: ["Ucho", "Kawa", "Herbata", "Ceramika", "Stół"] },
+                { word: "Talerz", clueList: ["Brzeg", "Jedzenie", "Zupa", "Obiad", "Stół"] },
+                { word: "Łyżka", clueList: ["Zupa", "Głęboka", "Jedzenie", "Metal", "Herbata"] },
+                { word: "Nożyczki", clueList: ["Cięcie", "Papier", "Ostrza", "Rączki", "Krawiec"] },
+                { word: "Długopis", clueList: ["Wkład", "Atrament", "Pisanie", "Notatka", "Stalówka"] },
+                { word: "Ołówek", clueList: ["Grafit", "Drewno", "Gumka", "Rysowanie", "Struganie"] },
+                { word: "Gumka", clueList: ["Ścieranie", "Błąd", "Ołówek", "Kawałek", "szkolna"] },
+                { word: "Zeszyt", clueList: ["Margines", "Linijka", "Notatki", "Lekcja", "Kartki"] },
+                { word: "Książka", clueList: ["Okładka", "Strony", "Czytanie", "Autor", "Biblioteka"] },
+                { word: "Kołdra", clueList: ["Poszwa", "Łóżko", "Ciepło", "Spanie", "Puch"] },
+                { word: "Ręcznik", clueList: ["Frotte", "Wycieranie", "Kąpiel", "Miękki", "Łazienka"] },
+                { word: "Mydło", clueList: ["Piana", "Kostka", "Mycie", "Zapach", "Umywalka"] },
+                { word: "Szczoteczka", clueList: ["Włosie", "Zęby", "Pasta", "Łazienka", "Rano"] },
+                { word: "Grzebień", clueList: ["Zęby", "Włosy", "Czesanie", "Plastik", "Kieszeń"] },
+                { word: "Suszarka", clueList: ["Ciepło", "Włosy", "Wiatr", "Prąd", "Łazienka"] },
+                { word: "Żelazko", clueList: ["Para", "Deska", "Ubrania", "Ciepło", "Zagniatania"] },
+                { word: "Pralka", clueList: ["Proszek", "Bęben", "Wirowanie", "Woda", "Ubrania"] },
+                { word: "Lodówka", clueList: ["Agregat", "Jedzenie", "Zimno", "Drzwi", "Kuchnia"] },
+                { word: "Kuchenka", clueList: ["Palnik", "Garnek", "Gotowanie", "Płomień", "Gaz"] },
+                { word: "Mikrofalówka", clueList: ["Talerz", "Ogrzewanie", "Fala", "Czas", "Szybko"] },
+                { word: "Czajnik", clueList: ["Gwizdek", "Woda", "Wrzątek", "Prąd", "Gotowanie"] },
+                { word: "Toster", clueList: ["Grzanka", "Wyskakujące", "Piekarnik", "Chleb", "Rano"] },
+                { word: "Młynek", clueList: ["Ziarna", "Kawa", "Kręcenie", "Aromat", "Ręczny"] },
+                { word: "Garnek", clueList: ["Pokrywka", "Zupa", "Ucha", "Metal", "Kuchnia"] },
+                { word: "Patelnia", clueList: ["Rączka", "Smażenie", "Olej", "Teflon", "Kuchnia"] },
+                { word: "Miotła", clueList: ["Kij", "Zamiatanie", "Podłoga", "Włosie", "Czystość"] },
+                { word: "Mop", clueList: ["Wiadro", "Mycie", "Woda", "Podłoga", "Kij"] },
+                { word: "Młotek", clueList: ["Gwóźdź", "Uderzenie", "Rączka", "Metal", "Warsztat"] },
+                { word: "Śrubokręt", clueList: ["Śruba", "Rączka", "Krzyżak", "Kręcenie", "Narzedzie"] },
+                { word: "Piła", clueList: ["Zęby", "Drewno", "Cięcie", "Rączka", "Metal"] },
+                { word: "Wiertarka", clueList: ["Wiertło", "Hałas", "Ściana", "Dziura", "Prąd"] },
+                { word: "Drabina", clueList: ["Szczebel", "Wysokość", "Składana", "Aluminium", "Wejście"] },
+                { word: "Świeca", clueList: ["Knot", "Wosku", "Płomień", "Ciemność", "Zapach"] },
+                { word: "Zapałki", clueList: ["Siarka", "Pudełko", "Ogień", "Draśnięcie", "Krótkie"] },
+                { word: "Zapalniczka", clueList: ["Krzemień", "Gaz", "Płomień", "Plastik", "Ogień"] },
+                { word: "Gaśnica", clueList: ["Proszek", "Pożar", "Czerwona", "Wąż", "Bezpieczeństwo"] },
+                { word: "Kask", clueList: ["Pasek", "Głowa", "Ochrona", "Budowa", "Rower"] },
+                { word: "Rękawice", clueList: ["Palce", "Zima", "Dłonie", "Skóra", "Ochrona"] },
+                { word: "Maska", clueList: ["Twarz", "Bal", "Ochrona", "Przebranie", "Plastik"] },
+                { word: "Buty", clueList: ["Sznurowadła", "Stopy", "Podeszwa", "Chodzenie", "Skóra"] },
+                { word: "Skarpetka", clueList: ["Pięta", "Stopa", "Pralka", "Dwie", "Bawełna"] },
+                { word: "Czapka", clueList: ["Daszek", "Głowa", "Zima", "Słońce", "Ubranie"] },
+                { word: "Kurtka", clueList: ["Zamek", "Rękawy", "Zimno", "Kaptur", "Ubranie"] },
+                { word: "Spodnie", clueList: ["Kieszeń", "Nogi", "Pasek", "Dżinsy", "Ubranie"] },
+                { word: "Pasek", clueList: ["Klamra", "Spodnie", "Skóra", "Talia", "Dziurki"] },
+                { word: "Krawat", clueList: ["Węzeł", "Szyja", "Koszula", "Elegancki", "Garnitur"] },
+                { word: "Wózek", clueList: ["Kółka", "Dziecko", "Zakupy", "Rączka", "Pchanie"] },
+                { word: "Hulajnoga", clueList: ["Kierownica", "Dwa kółka", "Odpychanie", "Platforma", "Składana"] },
+                { word: "Deskorolka", clueList: ["Trucki", "Kółka", "Deska", "Skok", "Rampa"] },
+                { word: "Rolki", clueList: ["Hamulec", "Kółka w rzędzie", "But", "Jazda", "Nogi"] },
+                { word: "Piłka", clueList: ["Okrągła", "Kopanie", "Mecz", "Powietrze", "Boisko"] },
+                { word: "Rakieta", clueList: ["Naciąg", "Tenis", "Badminton", "Uderzenie", "Rączka"] },
+                { word: "Gwizdek", clueList: ["Sędzia", "Dźwięk", "Metal", "Ustnik", "Mecz"] },
+                { word: "Hantle", clueList: ["Ciężar", "Ręka", "Siłownia", "Metal", "Trening"] },
+                { word: "Mata", clueList: ["Pianka", "Joga", "Podłoga", "Ćwiczenia", "Zwinięta"] },
+                { word: "Namiot", clueList: ["Śledź", "Materiał", "Stelaż", "Kemping", "Nocleg"] },
+                { word: "Śpiwór", clueList: ["Zamek", "Namiot", "Ciepło", "Nocleg", "Rolka"] },
+                { word: "Kompas", clueList: ["Igła", "Północ", "Kierunek", "Mapa", "Wskazówka"] },
+                { word: "Lornetka", clueList: ["Soczewka", "Przybliżenie", "Oczy", "Dystans", "Tubus"] },
+                { word: "Termos", clueList: ["Korek", "Ciepło", "Herbata", "Metal", "Wyprawa"] },
+                { word: "Scyzoryk", clueList: ["Ostrza", "Kieszonkowy", "Składany", "Wielofunkcyjny", "Metal"] },
+                { word: "Wędka", clueList: ["Spławik", "Żyłka", "Haczyk", "Rzeka", "Ryby"] },
+                { word: "Kotwica", clueList: ["Łańcuch", "Statek", "Dno", "Ciężka", "Postój"] },
+                { word: "Kierownica", clueList: ["Trąbka", "Skręcanie", "Samochód", "Ręce", "Deska"] },
+                { word: "Fotel", clueList: ["Oparcie", "Wygoda", "Salon", "Siedzenie", "Miękki"] },
+                { word: "Stół", clueList: ["Noga", "Blat", "Jedzenie", "Krzesła", "Drewno"] },
+                { word: "Szafa", clueList: ["Wieszak", "Ubrania", "Drzwi", "Półki", "Drewno"] },
+                { word: "Materac", clueList: ["Łóżko", "Sprężyny", "Spanie", "Wygoda", "Dmuchany"] },
+                { word: "Dywaniik", clueList: ["Włosie", "Podłoga", "Wzór", "Miękki", "Stopy"] },
+                { word: "Zasłona", clueList: ["Karnisz", "Okno", "Materiał", "Ciemność", "Pokój"] },
+                { word: "Obraz", clueList: ["Rama", "Ściana", "Sztuka", "Malarz", "Płótno"] },
+                { word: "Zegar", clueList: ["Cyferblat", "Ściana", "Czas", "Wskazówki", "Tykanie"] },
+                { word: "Wazon", clueList: ["Kwiaty", "Woda", "Szkło", "Stół", "Flakon"] },
+                { word: "Doniczka", clueList: ["Ziemia", "Kwiat", "Plastik", "Parapet", "Otwór"] },
+                { word: "Klawiatura", clueList: ["Klawisze", "Pisanie", "Komputer", "Litery", "Palce"] },
+                { word: "Kabel", clueList: ["Prąd", "Wtyczka", "Połączenie", "Długi", "Miedź"] },
+                { word: "Zapalniczka", clueList: ["Płomień", "Gaz", "Kieszeń", "Ogień", "Iskra"] },
+                { word: "Popielniczka", clueList: ["Papierosy", "Popiół", "Stół", "Okrągła", "Kawiarnia"] },
+                { word: "Igła", clueList: ["Nitka", "Szycie", "Ostra", "Ucho", "Krawiec"] },
+                { word: "Nitka", clueList: ["Igła", "Szpulka", "Szycie", "Ubranie", "Cienka"] },
+                { word: "Gąbka", clueList: ["Woda", "Piana", "Zmywanie", "Porowata", "Miękka"] },
+                { word: "Ścierka", clueList: ["Wycieranie", "Kuchnia", "Stół", "Materiał", "Plamy"] },
+                { word: "Wiadro", clueList: ["Woda", "Uchwyt", "Plastik", "Mop", "Pojemnik"] },
+                { word: "Szufelka", clueList: ["Śmieci", "Zamiatanie", "Plastik", "Miotła", "Podłoga"] },
+                { word: "Koszyk", clueList: ["Zakupy", "Uchwyt", "Wiklina", "Sklep", "Przenoszenie"] },
+                { word: "Torebka", clueList: ["Kobieta", "Ramię", "Kieszonki", "Portfel", "Skóra"] },
+                { word: "Paszport", clueList: ["Dokument", "Granica", "Zdjęcie", "Zagranica", "Strony"] },
+                { word: "Dowód", clueList: ["Dokument", "Pełnoletność", "Plastik", "Zdjęcie", "Tożsamość"] },
+                { word: "Bilet", clueList: ["Kontrola", "Podróż", "Papier", "Autobus", "Wejściówka"] },
+                { word: "Moneta", clueList: ["Grosz", "Metal", "Reszta", "Kieszeń", "Okrągła"] },
+                { word: "Banknot", clueList: ["Papier", "Pieniądze", "Nominał", "Portfel", "Bank"] },
+                { word: "Karta płatnicza", clueList: ["Plastik", "Chip", "Płatność", "Bankomat", "PIN"] },
+                { word: "Kłódka", clueList: ["Klucz", "Zabezpieczenie", "Metal", "Łańcuch", "Ucho"] },
+                { word: "Łańcuch", clueList: ["Ogniwa", "Metal", "Rower", "Kotwica", "Siła"] },
+                { word: "Lina", clueList: ["Węzeł", "Wytrzymała", "Statek", "Wspinaczka", "Gruba"] },
+                { word: "Taśma", clueList: ["Klej", "Rolka", "Przezroczysta", "Łączenie", "Pakowanie"] },
+                { word: "Klej", clueList: ["Tubka", "Łączenie", "Papier", "Lepki", "Schnięcie"] },
+                { word: "Pędzel", clueList: ["Farba", "Włosie", "Malarz", "Rączka", "Sztuka"] },
+                { word: "Farba", clueList: ["Kolor", "Puszka", "Ściana", "Pędzel", "Mokra"] },
+                { word: "Wałek", clueList: ["Malowanie", "Ściana", "Rączka", "Farbę", "Remont"] },
+                { word: "Drabina", clueList: ["Stopnie", "Wysokość", "Składana", "Aluminium", "Praca"] },
+                { word: "Zlew", clueList: ["Kran", "Woda", "Naczynia", "Kuchnia", "Odpływ"] },
+                { word: "Kran", clueList: ["Woda", "Kurki", "Metal", "Zlew", "Strumień"] },
+                { word: "Wanna", clueList: ["Kąpiel", "Piana", "Woda", "Łazienka", "Leżenie"] },
+                { word: "Prysznic", clueList: ["Kabina", "Woda", "Słuchawka", "Szybko", "Mydło"] },
+                { word: "Klozet", clueList: ["Łazienka", "Woda", "Deska", "Spłuczka", "Ceramika"] },
+                { word: "Grzejnik", clueList: ["Ciepło", "Zima", "Kaloryfer", "Ściana", "Woda"] },
+                { word: "Wentylator", clueList: ["Wiatr", "Śmigło", "Lato", "Gorąco", "Prąd"] },
+                { word: "Klimatyzator", clueList: ["Zimno", "Pilot", "Ściana", "Lato", "Chłód"] },
+                { word: "Termometr", clueList: ["Temperatura", "Gorączka", "Słupek", "Zdrowie", "Pogoda"] },
+                { word: "Barometr", clueList: ["Ciśnienie", "Pogoda", "Wskazówka", "Zmiana", "Deszcz"] },
+                { word: "Waga", clueList: ["Kilogramy", "Masa", "Stawianie", "Kuchnia", "Łazienka"] },
+                { word: "Metr", clueList: ["Mierzenie", "Długość", "Taśma", "Zwinięty", "Centymetry"] },
+                { word: "Kątomierz", clueList: ["Szkoła", "Kąty", "Geometria", "Plastik", "Piórnik"] },
+                { word: "Cyrkiel", clueList: ["Okrąg", "Matematyka", "Ostre", "Rysowanie", "Nóżki"] },
+                { word: "Piórnik", clueList: ["Przybory", "Szkoła", "Zamek", "Długopisy", "Plecak"] },
+                { word: "Plecak szkolny", clueList: ["Szkoła", "Książki", "Plecy", "Wycieczka", "Zamek"] }
+            ],
+            popculture: [
+                { word: "Batman", clueList: ["Jaskinia", "Nietoperz", "Mrok", "Gotham", "Kostium"] },
+                { word: "Harry Potter", clueList: ["Blizna", "Okulary", "Różdżka", "Magia", "Zamek"] },
+                { word: "Shrek", clueList: ["Cebula", "Bagno", "Zielony", "Osioł", "Zamek"] },
+                { word: "Spider-Man", clueList: ["Siatka", "Pająk", "Nowy Jork", "Muzyka", "Skakanie"] },
+                { word: "Darth Vader", clueList: ["Oddech", "Czarny", "Moc", "Miecz", "Ojciec"] },
+                { word: "Titanic", clueList: ["Kataklizm", "Góra lodowa", "Statek", "Ocean", "Miłość"] },
+                { word: "Barbie", clueList: ["Plastik", "Różowy", "Lalka", "Domek", "Ken"] },
+                { word: "Minecraft", clueList: ["Kwadrat", "Bloki", "Kreatywność", "Kryper", "Budowanie"] },
+                { word: "Superman", clueList: ["Peleryna", "Krypton", "S", "Latanie", "Superbohater"] },
+                { word: "Joker", clueList: ["Uśmiech", "Fioletowy", "Karty", "Klaun", "Chaos"] },
+                { word: "Yoda", clueList: ["Uszy", "Zielony", "Moc", "Mistrz", "Bagno"] },
+                { word: "Minionek", clueList: ["Banan", "Żółty", "Okulary", "Język", "Zło"] },
+                { word: "Pikachu", clueList: ["Piorun", "Żółty", "Elektryczność", "Kulka", "Anime"] },
+                { word: "Mario", clueList: ["Wąs", "Grzyb", "Księżniczka", "Skok", "Hydraulik"] },
+                { word: "Thor", clueList: ["Młot", "Bóg", "Pioruny", "Komiks", "Asgard"] },
+                { word: "Sonic", clueList: ["Niebieski", "Szybkość", "Jeż", "Złote pierścienie", " Sega"] },
+                { word: "Thanos", clueList: ["Rękawica", "Kamienie", "Fioletowy", "Kliknięcie", "Marvel"] },
+                { word: "Iron Man", clueList: ["Reaktor", "Zbroja", "Tony Stark", "Marvel", "Billionaire"] },
+                { word: "Kapitan Ameryka", clueList: ["Tarcza", "Gwiazda", "Super żołnier", "Marvel", "Ameryka"] },
+                { word: "Hulk", clueList: ["Zielony", "Wściekłość", "Moc", "Rozrywanie", "Bruce Banner"] },
+                { word: "Gollum", clueList: ["Pierścień", "Skarb", "Jaskinia", "Moje", "Hobbity"] },
+                { word: "Gandalf", clueList: ["Laska", "Czarodziej", "Broda", "Szary", "Władca Pierścieni"] },
+                { word: "Frodo", clueList: ["Stopy", "Pierścień", "Hobbity", "Góra Przeznaczenia", "Shire"] },
+                { word: "Jack Sparrow", clueList: ["Rum", "Kompas", "Piraci", "Czarna Perła", "Kapitan"] },
+                { word: "Indiana Jones", clueList: ["Bicz", "Kapelusz", "Archeolog", "Węże", "Skarb"] },
+                { word: "Terminator", clueList: ["Oko", "Cyberdyne", "Skynet", "Arnold", "Przyszłość"] },
+                { word: "Neo", clueList: ["Pigułka", "Matrix", "Unikanie kul", "Haker", "Wybawca"] },
+                { word: "Avatar", clueList: ["Niebieski", "Pandora", "Na'vi", "Drzewo dusz", "James Cameron"] },
+                { word: "Simba", clueList: ["Skała", "Król Lew", "Hyeny", "Mufasa", "Afryka"] },
+                { word: "Myszka Miki", clueList: ["Uszy", "Disney", "Myszk", "Rękawiczki", "Kultowy"] },
+                { word: "Kaczor Donald", clueList: ["Mundurek", "Kaczka", "Złość", "Disney", "Marynarski"] },
+                { word: "Kuba Puchatek", clueList: ["Miod", "Stumilowy Las", "Prosiaczek", "Miś", "Słodki"] },
+                { word: "Elsa", clueList: ["Lód", "Kraina Lodu", "Zimno", "Magia", "Korona"] },
+                { word: "Osioł", clueList: ["Wafle", "Shrek", "Gadający", "Przyjaciel", "Kopyta"] },
+                { word: "Fiona", clueList: ["Ogrzyca", "Zamek", "Shrek", "Księżniczka", "Zielona"] },
+                { word: "Madagaskar", clueList: ["Zebra", "Lew", "Wyspa", "Wybieg", "Nowy Jork"] },
+                { word: "Pingwiny", clueList: ["Kowalski", "Madagaskar", "Tajniacy", "Czarno-białe", "Notatnik"] },
+                { word: "Epoka Lodowcowa", clueList: ["Żołędź", "Wiewiórka", "Mamut", "Zimno", "Scret"] },
+                { word: "Scooby-Doo", clueList: ["Chrupki", "Pies", "Tajemnica", "Wóz", "Strach"] },
+                { word: "Tom i Jerry", clueList: ["Kot", "Mysz", "Pułapka", "Pościg", "Kreskówka"] },
+                { word: "Flintstonowie", clueList: ["Kamień", "Jaskiniowiec", "Auto na nogi", "Bedrock", "Dino"] },
+                { word: "Simpsonowie", clueList: ["Żółci", "Pączki", "Homer", "Springfield", "Kultowy"] },
+                { word: "SpongeBob", clueList: ["Kanciastoporty", "Ananas", "Gąbka", "Krab", "Bikini Dolne"] },
+                { word: "Gwiezdne Wojny", clueList: ["Miecz świetlny", "Moc", "Imperium", "Statki", "Kosmos"] },
+                { word: "Władca Pierścieni", clueList: ["Sauron", "Pierścień", "Śródziemie", "Elf", "Orkowie"] },
+                { word: "Gra o Tron", clueList: ["Smok", "Żelazny Tron", "Zima", "Ród", "Westeros"] },
+                { word: "Wiedźmin", clueList: ["Miecze", "Geralt", "Potwory", "Biały Wilk", "Eliksir"] },
+                { word: "Stranger Things", clueList: ["Demogorgon", "Druga Strona", "Hawkins", "Rowery", "Eleven"] },
+                { word: "Squid Game", clueList: ["Lalka", "Gry dziecięce", "Zielone dresy", "Dług", "Czerwoni"] },
+                { word: "Dom z Papieru", clueList: ["Maska Dalego", "Kradzież", "Profesor", "Czerwone kombinezony", "Bank"] },
+                { word: "Breaking Bad", clueList: ["Kapelusz", "Walter White", "Niebieska meta", "Chemia", "Kamper"] },
+                { word: "Przyjaciele", clueList: ["Kanapa", "Central Perk", "Nowy Jork", "Sześcioro", "Kultowy"] },
+                { word: "The Office", clueList: ["Kubek", "Dundie", "Papier", "Biuro", "Mockument"] },
+                { word: "Park Jurajski", clueList: ["Bursztyn", "Dinozaury", "Wyspa", "Genetyka", "Park"] },
+                { word: "Rambo", clueList: ["Opaska", "Wietnam", "Komandos", "Nóż", "Akcja"] },
+                { word: "Rocky", clueList: ["Schody", "Bokser", "Philadelphia", "Trening", "Wysiłek"] },
+                { word: "Gladiator", clueList: ["Koloseum", "Miecz", "Rzym", "Zemsta", "Arena"] },
+                { word: "Pulp Fiction", clueList: ["Walizka", "Tarantino", "Taneczne", " gangsterski", "Hamburgery"] },
+                { word: "Ojciec Chrzestny", clueList: ["Róża", "Mafia", "Głowa rodziny", "Syndykat", "Don"] },
+                { word: "Deadpool", clueList: ["Katanas", "Czerwony kostium", "Żarty", "Marvel", "Nieśmiertelność"] },
+                { word: "Wolverine", clueList: ["Pazury", "Adamant", "X-Men", "Cygaro", "Mutant"] },
+                { word: "Szybcy i Wściekli", clueList: ["Rodzina", "Samochody", "Nitro", "Wyścigi", "Akcja"] },
+                { word: "Ghostbusters", clueList: ["Pułapka", "Duchy", "Plecak protonowy", "Alarm", "Nowy Jork"] },
+                { word: "Men in Black", clueList: ["Błysk", "Czarne garnitury", "Kosmici", "Pamięć", "Okular"] },
+                { word: "Transformers", clueList: ["Auto", "Roboty", "Optimus", "Decepticon", "Przemiana"] },
+                { word: "Godzilla", clueList: ["Ryk", "Potwór", "Miasto", "Wielki", "Japonia"] },
+                { word: "King Kong", clueList: ["Wieża", "Małpa", "Empire State", "Wielki", "Wyspa"] },
+                { word: "Pac-Man", clueList: ["Kropki", "Labirynt", "Duszki", "Żółty", "Zjadanie"] },
+                { word: "Tetris", clueList: ["Klocki", "Układanie", "Spadanie", "Linie", "Rosja"] },
+                { word: "Fortnite", clueList: ["Taniec", "Budowanie", "Battle Royale", "Karnet", "Wyspa"] },
+                { word: "GTA", clueList: ["Auto", "Kradzież", "Miasto", "Misje", "Wolność"] },
+                { word: "Roblox", clueList: ["Klocek", "Platforma", "Gry", "Avatar", "Robux"] },
+                { word: "League of Legends", clueList: ["Nexus", "Bohaterowie", "Linia", "Wieże", "MOBA"] },
+                { word: "Counter-Strike", clueList: ["Bomba", "Terroryści", "Paczka", "Strzelanka", "Runda"] },
+                { word: "Cyberpunk", clueList: ["Miasto", "Implanty", "Neon", "Przyszłość", "Netrunner"] },
+                { word: "Zelda", clueList: ["Miecz", "Księżniczka", "Hyrule", "Przygoda", "Link"] },
+                { word: "Mario Bros", clueList: ["Grzyb", "Hydraulik", "Złote monety", "Księżniczka", "Przeskoki"] },
+                { word: "Donkey Kong", clueList: ["Beczka", "Małpa", "Wspinaczka", "Banany", "Klasyk"] },
+                { word: "Mortal Kombat", clueList: ["Fatality", "Smok", "Walka", "Scorpion", "Sub-Zero"] },
+                { word: "Street Fighter", clueList: ["Hadouken", "Ryu", "Turniej", "Walka", "Kraty"] },
+                { word: "Ken", clueList: ["Plaża", "Barbie", "Domek", "Plastik", "Blondyn"] },
+                { word: "Oppenheimer", clueList: ["Wybuch", "Bomby", "Fizyk", "Los Alamos", "Atom"] },
+                { word: "Wonka", clueList: ["Bilet", "Czekolada", "Fabryka", "Słodycze", "Złoty bilet"] },
+                { word: "Toy Story", clueList: ["Kowboj", "Zabawki", "Buzz", "Andy", "Życie zabawek"] },
+                { word: "Auta", clueList: ["Zygzak", "Wyścig", "Samochody", "Chłodnica", "Nascar"] },
+                { word: "Odlot", clueList: ["Balony", "Dom", "Staruszek", "Przygoda", "Pies"] },
+                { word: "Iniemamocni", clueList: ["Kombinezon", "Rodzina", "Superbohaterowie", "Moc", "Logo"] },
+                { word: "Gdzie jest Nemo", clueList: ["Rafa", "Zagubiona rybka", "Ocean", "Tata", "Poszukiwania"] },
+                { word: "Ratatuj", clueList: ["Szczur", "Gotowanie", "Francja", "Restauracja", "Kucharz"] },
+                { word: "Wall-E", clueList: ["Taśma", "Robot", "Śmieci", "Ziemia", "Kosmos"] },
+                { word: "Pokémon", clueList: ["Kula", "Trener", "Stworki", "Łapanie", "Kanto"] },
+                { word: "Naruto", clueList: ["Ramen", "Opaska", "Ninja", "Kreskówka", "Wioska"] },
+                { word: "Dragon Ball", clueList: ["Kule", "Goku", "Super Saiyan", "Walka", "Ogon"] },
+                { word: "One Piece", clueList: ["Kapelusz", "Piraci", "Skarb", "Statek", "Grand Line"] },
+                { word: "Attack on Titan", clueList: ["Tytani", "Mur", "Skrzydła", "Wojsko", "Giganci"] },
+                { word: "Death Note", clueList: ["Notatnik", "Jabłka", "Detektyw", "Śmierć", "Shinogami"] },
+                { word: "Spider-Verse", clueList: ["Wieloświat", "Pająki", "Komiks", "Animacja", "Skok"] },
+                { word: "Matrix", clueList: ["Kod", "Zielony", "Pigułka", "Agenci", "Wirtualny"] },
+                { word: "Interstellar", clueList: ["Czerń", "Czas", "Kosmos", "Grawitacja", "Kukurydza"] },
+                { word: "Incepcja", clueList: ["Sny", "Bączek", "Podświadomość", "Wielowarstwowość", "Kradzież"] },
+                { word: "Fight Club", clueList: ["Mydło", "Zasady", "Klub", "Bójka", "Narrator"] },
+                { word: "Forrest Gump", clueList: ["Pudełko czekoladek", "Biegnij", "Ławka", "Piórko", "Krewetki"] },
+                { word: "Gladiator", clueList: ["Arena", "Zemsta", "Maksym", "Rzym", "Cesatstwo"] },
+                { word: "Skazani na Shawshank", clueList: ["Plakat", "Więzienie", "Młoteczek", "Ucieczka", "Nadzieja"] },
+                { word: "Zielona Mila", clueList: ["Myszka", "Więzienie", "Krzesło elektryczne", "Cud", "John Coffey"] },
+                { word: "Władca Pierścieni: Drużyna Pierścienia", clueList: ["Rivendell", "Moria", "Góry", "Zniszczenie", "Ring"] },
+                { word: "Hobbit", clueList: ["Smok", "Skarb", "Nora", "Pierścień", "Krasnoludy"] },
+                { word: "Pirates of the Caribbean", clueList: ["Statek", "Kornel", "Kompas", "Klątwa", "Złoto"] },
+                { word: "Indiana Jones i Poszukiwacze zaginionej Arki", clueList: ["Arka", "Świątynia", "Pułapki", "Nazisi", "Pustynia"] },
+                { word: "Mad Max: Na drodze gniewu", clueList: ["Pustynia", "Pojazdy", "Gitara", "Woda", "Akcja"] },
+                { word: "Blade Runner", clueList: ["Replikant", "Deszcz", "Futuryzm", "Android", "Test"] },
+                { word: "Alien", clueList: ["Ksenomorf", "Statki kosmiczne", "Jaja", "Kwas", "Nostromo"] },
+                { word: "Predator", clueList: ["Dżungla", "Maskowanie", "Kosmita", "Łów", "Termowizja"] },
+                { word: "Die Hard", clueList: ["Wieżowiec", "Nakatomi", "Święta", "Bosch", "Klimatyzacja"] },
+                { word: "Back to the Future", clueList: ["DeLorean", "Strumień", "Pluton", "1955", "Doktor"] },
+                { word: "Ghost in the Shell", clueList: ["Cyborg", "Cyberprzestrzeń", "Anime", "Dusza", "Miasto"] },
+                { word: "Akira", clueList: ["Motocykl", "Neo-Tokyo", "Moc", "Anime", "Eksperyment"] },
+                { word: "Cowboy Bebop", clueList: ["Jazz", "Statek", "Łowcy nagród", "Kosmos", "Spike"] },
+                { word: "Evangelion", clueList: ["Mecha", "Anioły", "Nerv", "Piloci", "Klimat"] },
+                { word: "Fullmetal Alchemist", clueList: ["Alchemia", "Krąg", "Bracia", "Stalowy", "Kamień filozoficzny"] },
+                { word: "Bleach", clueList: ["Miecz", "Kurosaki", "Dusze", "Shinigami", "Pustki"] },
+                { word: "Hunter x Hunter", clueList: ["Egzamin", "Nen", "Gon", "Łowca", "Przygoda"] },
+                { word: "Demon Slayer", clueList: ["Miecz", "Oddech", "Demony", "Nezuko", "Tanjiro"] },
+                { word: "Jujutsu Kaisen", clueList: ["Klątwy", "Palce", "Sukuna", "Szkoła", "Magia"] },
+                { word: "Chainsaw Man", clueList: ["Piła", "Piesek", "Piekło", "Serce", "Makima"] },
+                { word: "Spy x Family", clueList: ["Szpieg", "Telepatka", "Zabójczyni", "Pies", "Fałszywa rodzina"] },
+                { word: "Oshi no Ko", clueList: ["Idol", "Reinkarnacja", "Showbiznes", "Tajemnica", "Gwiazda"] },
+                { word: "Bocchi the Rock", clueList: ["Gitara", "Fobia społeczna", "Zespół", "Różowy", "Klub"] },
+                { word: "Blue Lock", clueList: ["Piłka nożna", "Napastnik", "Egoizm", "Trening", "Projekt"] },
+                { word: "Haikyuu", clueList: ["Siatkówka", "Skok", "Karasuno", "Boisko", "Drużyna"] },
+                { word: "Kuroko no Basket", clueList: ["Koszykówka", "Widmo", "Podanie", "Generacja", "Szkoła"] },
+                { word: "Free!", clueList: ["Pływanie", "Woda", "Klub", "Sztafeta", "Basen"] },
+                { word: "Yuri on Ice", clueList: ["Łyżwiarstwo", "Lodowisko", "Rosja", "Program", "Trener"] }
+            ],
+            halloween: [
+                { word: "Dynie", clueList: ["Latarnia", "Pomarańczowy", "Świeczka", "Halloween", "Rzeźbienie"] },
+                { word: "Duch", clueList: ["Przebranie", "Biały", "Strach", "Przenikanie", "Zjawisko"] },
+                { word: "Wiedźma", clueList: ["Miotła", "Kociołek", "Kapelusz", "Magia", "Zioła"] },
+                { word: "Wampir", clueList: ["Kły", "Krew", "Czosnek", "Trumna", "Noc"] },
+                { word: "Zombie", clueList: ["Mózg", "Chód", "Nieumarły", "Cmentarz", "Horda"] },
+                { word: "Cukierek albo psikus", clueList: ["Hasło", "Dzieci", "Słodycze", "Drzwi", "Tradycja"] },
+                { word: "Szkielet", clueList: ["Kości", "Czaszka", "Szafa", "Halloween", "Biały"] },
+                { word: "Cmentarz", clueList: ["Groby", "Znicze", "Noc", "Mgła", "Duchy"] },
+                { word: "Kostium", clueList: ["Maska", "Przebieranie", "Impreza", "Makijaż", "Postać"] },
+                { word: "Nietoperz", clueList: ["Skrzydła", "Jaskinia", "Głową w dół", "Noc", "Radar"] }
+            ],
+            christmas: [
+                { word: "Choinka", clueList: ["Igły", "Bombki", "Światełka", "Gwiazda", "Prezenty"] },
+                { word: "Mikołaj", clueList: ["Broda", "Czerwony", "Renifer", "Prezenty", "Worek"] },
+                { word: "Karp", clueList: ["Wigilia", "Łuska", "Staw", "Ość", "Tradycja"] },
+                { word: "Piernik", clueList: ["Cynamon", "Lukier", "Pieczenie", "Korzenny", "Serce"] },
+                { word: "Śnieg", clueList: ["Płatki", "Mróz", "Biały", "Zima", "Bałwan"] },
+                { word: "Prezent", clueList: ["Wstążka", "Pudełko", "Niespodzianka", "Choinka", "Pakowanie"] },
+                { word: "Opłatek", clueList: ["Życzenia", "Biały", "Wigilia", "Łamanie", "Stół"] },
+                { word: "Kolęda", clueList: ["Śpiew", "Nuta", "Tekst", "Kaplica", "Wieczór"] },
+                { word: "Renifer", clueList: ["Czerwononosy", "Sanie", "Biegun", "Zwierzę", "Zimno"] },
+                { word: "Barszcz", clueList: ["Uszka", "Czerwony", "Wigilia", "Buraki", "Zupa"] }
+            ],
+            easter: [
+                { word: "Pisanka", clueList: ["Kolory", "Wosk", "Malowanie", "Koszyk", "Tradycja"] },
+                { word: "Zajączek", clueList: ["Prezenty", "Kic", "Nora", "Wielkanoc", "Ukrywanie"] },
+                { word: "Święconka", clueList: ["Koszyk", "Serwetka", "Kościół", "Pokarmy", "Wielka Sobota"] },
+                { word: "Baranek", clueList: ["Cukier", "Chorągiewka", "Stół", "Symbole", "Wielkanoc"] },
+                { word: "Palma", clueList: ["Bazi", "Kolorowa", "Niedziela", "Kwiaty", "Procesja"] },
+                { word: "Chrzan", clueList: ["Ostrość", "Święconka", "Tradycja", "Korzeń", "Biały"] },
+                { word: "Żur", clueList: ["Kiełbasa", "Jajko", "Zakwas", "Śniadanie", "Zupa"] },
+                { word: "Baza", clueList: ["Kotki", "Gałązka", "Wiosna", "Wazon", "Wielkanoc"] },
+                { word: "Śmigus-dyngus", clueList: ["Woda", "Lany poniedziałek", "Mokro", "Pryskanie", "Zabawa"] },
+                { word: "Babka", clueList: ["Ciasto", "Lukier", "Wypiek", "Stół", "Drożdżowa"] }
+            ]
+        };
+
+        let players = [];
+        let gameData = [];
+        let currentIndex = 0;
+
+        function getUsedWords(catKey) {
+            try { return JSON.parse(localStorage.getItem("imp_used_" + catKey)) || []; } catch(e) { return []; }
+        }
+        function markUsed(catKey, word) {
+            try {
+                let u = getUsedWords(catKey);
+                if (!u.includes(word)) { u.push(word); localStorage.setItem("imp_used_" + catKey, JSON.stringify(u)); }
+            } catch(e) {}
+        }
+        function getUnusedRandomObject(catKey) {
+            let pool = dynamicDatabase[catKey];
+            let used = getUsedWords(catKey);
+            let available = pool.filter(p => !used.includes(p.word));
+            if (available.length === 0) {
+                localStorage.removeItem("imp_used_" + catKey);
+                available = pool;
+            }
+            let chosen = available[Math.floor(Math.random() * available.length)];
+            markUsed(catKey, chosen.word);
+            return chosen;
+        }
+
+        window.onload = () => {
+            const select = document.getElementById("category-select");
+            Object.keys(categories).forEach(k => {
+                const opt = document.createElement("option");
+                opt.value = k; opt.textContent = categories[k].name;
+                select.appendChild(opt);
+            });
+            updatePlayerList();
+            document.getElementById("player-input").addEventListener("keypress", (e) => {
+                if (e.key === "Enter") addPlayer();
+            });
+        };
+
+        function addPlayer() {
+            const inp = document.getElementById("player-input");
+            const val = inp.value.trim();
+            if (val && !players.includes(val)) {
+                players.push(val);
+                inp.value = "";
+                updatePlayerList();
+            }
+        }
+
+        function removePlayer(i) {
+            players.splice(i, 1);
+            updatePlayerList();
+        }
+
+        function updatePlayerList() {
+            const ul = document.getElementById("player-list");
+            ul.innerHTML = players.length === 0 ? `<li style="justify-content:center; color:var(--text-muted);">Brak graczy. Dodaj imiona wyżej!</li>` : "";
+            players.forEach((p, idx) => {
+                ul.innerHTML += `<li><span>${p}</span><button onclick="removePlayer(${idx})">✕</button></li>`;
+            });
+        }
+
+        function startGame() {
+            if (players.length < 3) { alert("Wpisz co najmniej 3 graczy!"); return; }
+            const impCount = parseInt(document.getElementById("impostor-count").value);
+            const hasMrWhite = parseInt(document.getElementById("mrwhite-toggle").value) === 1;
+
+            if (impCount + (hasMrWhite ? 1 : 0) >= players.length) {
+                alert("Za dużo ról w stosunku do liczby graczy!"); return;
+            }
+
+            let catKey = document.getElementById("category-select").value;
+            if (catKey === "any") {
+                const keys = Object.keys(dynamicDatabase);
+                catKey = keys[Math.floor(Math.random() * keys.length)];
+            }
+
+            const chosenObj = getUnusedRandomObject(catKey);
+            const secretWord = chosenObj.word;
+            
+            let shuffledClues = [...chosenObj.clueList].sort(() => Math.random() - 0.5);
+            let impostorClue1 = shuffledClues[0];
+            let impostorClue2 = shuffledClues[1] || shuffledClues[0];
+
+            let roles = [];
+            for (let i = 0; i < impCount; i++) roles.push("impostor");
+            if (hasMrWhite) roles.push("mrwhite");
+            while (roles.length < players.length) roles.push("civilian");
+
+            roles.sort(() => Math.random() - 0.5);
+
+            let impostorTracker = 0;
+            gameData = players.map((p, idx) => {
+                let role = roles[idx];
+                let assignedClue = "";
+                
+                if (role === "impostor") {
+                    assignedClue = (impostorTracker === 0) ? impostorClue1 : impostorClue2;
+                    impostorTracker++;
+                }
+
+                return {
+                    name: p,
+                    role: role,
+                    word: secretWord,
+                    clue: assignedClue
+                };
+            });
+
+            currentIndex = 0;
+            showScreen('reveal-screen');
+            loadPlayerTurn();
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function loadPlayerTurn() {
+            const data = gameData[currentIndex];
+            document.getElementById("current-player-name").innerText = data.name;
+
+            const iconEl = document.getElementById("role-icon");
+            const titleEl = document.getElementById("role-title");
+            const descEl = document.getElementById("role-desc");
+
+            cover.style.transition = 'none';
+            cover.style.transform = 'translateY(0)';
+            currentY = 0;
+            cardInner.classList.remove("revealed");
+
+            titleEl.className = "role-title-styled";
+
+            if (data.role === "civilian") {
+                iconEl.innerText = "👥";
+                titleEl.innerText = "Cywil";
+                titleEl.classList.add("civilian");
+                descEl.innerHTML = `Twoje słowo to:<span>"${data.word}"</span>`;
+            } else if (data.role === "impostor") {
+                iconEl.innerText = "🕵️‍♂️";
+                titleEl.innerText = "Impostor";
+                titleEl.classList.add("impostor");
+                descEl.innerHTML = `Twoja wskazówka to:<span>"${data.clue}"</span>`;
+            } else if (data.role === "mrwhite") {
+                iconEl.innerText = "🕵️‍♂️";
+                titleEl.innerText = "Mr White";
+                titleEl.classList.add("mrwhite");
+                descEl.innerHTML = `<span>Nie masz żadnego słowa! Blefuj!</span>`;
+            }
+
+            document.getElementById("next-btn").style.display = "none";
+        }
+
+        function nextPlayer() {
+            currentIndex++;
+            if (currentIndex < players.length) {
+                loadPlayerTurn();
+            } else {
+                const starter = players[Math.floor(Math.random() * players.length)];
+                document.getElementById("starter-player-name").innerText = starter;
+                showScreen('start-discussion-screen');
+            }
+        }
+
+        function replaysameGame() { startGame(); }
+        function resetGame() { showScreen('setup-screen'); }
+
+        const cover = document.getElementById("sliding-cover");
+        const cardContainer = document.getElementById("card-container");
+        const cardInner = document.getElementById("card-inner");
+        let startY = 0, currentY = 0, isDragging = false;
+
+        function getClientY(e) { return e.touches ? e.touches[0].clientY : e.clientY; }
+
+        function onStart(e) {
+            isDragging = true;
+            startY = getClientY(e);
+            cover.style.transition = 'none';
+        }
+
+        function onMove(e) {
+            if (!isDragging) return;
+            let delta = getClientY(e) - startY;
+            if (delta <= 0) {
+                currentY = Math.max(delta, -cardContainer.clientHeight);
+                cover.style.transform = `translateY(${currentY}px)`;
+                
+                if (currentY < -10) {
+                    cardInner.classList.add("revealed");
+                }
+            }
+        }
+
+        function onEnd() {
+            if (!isDragging) return;
+            isDragging = false;
+            cover.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+            if (currentY < -(cardContainer.clientHeight * 0.35)) {
+                cover.style.transform = `translateY(-100%)`;
+                cardInner.classList.add("revealed");
+                document.getElementById("next-btn").style.display = "block";
+            } else {
+                resetCover();
+            }
+        }
+
+        function resetCover() {
+            cover.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+            cover.style.transform = `translateY(0)`;
+            currentY = 0;
+            cardInner.classList.remove("revealed");
+        }
+
+        cover.addEventListener('touchstart', onStart, {passive:true});
+        window.addEventListener('touchmove', onMove, {passive:true});
+        window.addEventListener('touchend', onEnd);
+        cover.addEventListener('mousedown', onStart);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onEnd);
+    </script>
+</body>
+</html>
